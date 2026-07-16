@@ -1,0 +1,284 @@
+---
+title: "Més demanda, les mateixes places, notes de tall més altes"
+subtitle: "L'accés a les universitats públiques de Catalunya (preinscripció 2016–2025)"
+lang: ca
+date: today
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-title: "Continguts"
+    embed-resources: true
+    fig-width: 8
+    fig-height: 4.8
+    fig-dpi: 150
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+source("R/read_sheets.R")
+source("R/build_series.R")
+source("R/plots.R")
+
+s <- build_all()
+
+# format de nombres en català
+mil <- function(x) formatC(round(x), big.mark = ".", format = "d")
+dec <- function(x, d = 2) formatC(x, big.mark = ".", decimal.mark = ",", digits = d, format = "f")
+pct <- function(x, d = 0) paste0(dec(x, d), "%")
+getv <- function(df, yr, col) df[[col]][df$year == yr]
+
+y0d <- min(s$demanda$year); y1d <- max(s$demanda$year)   # finestra demanda/oferta
+y0n <- min(s$notes$year);   y1n <- max(s$notes$year)     # finestra notes/matrícula
+
+sol0 <- getv(s$demanda, y0d, "solicitants"); sol1 <- getv(s$demanda, y1d, "solicitants")
+pla0 <- getv(s$oferta,  y0d, "places");      pla1 <- getv(s$oferta,  y1d, "places")
+rat0 <- getv(s$pressio, y0d, "ratio");       rat1 <- getv(s$pressio, y1d, "ratio")
+med0 <- getv(s$notes,   y0n, "mediana");     med1 <- getv(s$notes,   y1n, "mediana")
+inf0 <- getv(s$notes,   y0n, "n_infrademandats"); inf1 <- getv(s$notes, y1n, "n_infrademandats")
+
+g_sol <- 100 * (sol1 / sol0 - 1)
+g_pla <- 100 * (pla1 / pla0 - 1)
+
+mat0 <- getv(s$matricula, y0n, "matricula"); mat1 <- getv(s$matricula, y1n, "matricula")
+g_mat <- 100 * (mat1 / mat0 - 1)
+
+# llindars de nota de tall: % d'estudis per damunt de t l'any yr
+getl <- function(t, yr) s$llindars$pct[s$llindars$llindar == t & s$llindars$year == yr]
+n0 <- getv(s$notes, y0n, "n"); n1 <- getv(s$notes, y1n, "n")
+
+# pic de la cua alta (llindar 12)
+l12    <- dplyr::filter(s$llindars, llindar == 12)
+yr_max12 <- l12$year[which.max(l12$pct)]
+pk12     <- max(l12$pct)
+
+# PAU: mateixa finestra que les notes de tall (l'any és el de les proves)
+pau_w <- dplyr::filter(s$pau, year >= y0n, year <= y1n)
+pre0 <- getv(pau_w, y0n, "presentats"); pre1 <- getv(pau_w, y1n, "presentats")
+exp0 <- getv(pau_w, y0n, "expedient");  exp1 <- getv(pau_w, y1n, "expedient")
+pro0 <- getv(pau_w, y0n, "nota_pau");   pro1 <- getv(pau_w, y1n, "nota_pau")
+acc0 <- getv(pau_w, y0n, "nota_acces"); acc1 <- getv(pau_w, y1n, "nota_acces")
+
+g_pre  <- 100 * (pre1 / pre0 - 1)
+d_exp  <- exp1 - exp0
+d_pro  <- pro1 - pro0
+d_acc  <- acc1 - acc0
+d_med  <- med1 - med0
+quota  <- 100 * d_acc / d_med          # quina part de la pujada del tall cobreix l'alumnat
+
+# darrer any: el model nou de PAU baixa la nota de l'alumnat, però el tall puja
+yprev  <- y1n - 1
+d_acc_ult <- acc1 - getv(pau_w, yprev, "nota_acces")
+d_med_ult <- med1 - getv(s$notes, yprev, "mediana")
+```
+
+## En síntesi
+
+Entre **`r y0d`** i **`r y1d`**, el nombre de sol·licitants en primera preferència a les
+universitats públiques catalanes ha crescut un **`r pct(g_sol)`** (de `r mil(sol0)` a
+`r mil(sol1)`), mentre que l'oferta de places gairebé no s'ha mogut: només un
+**`r pct(g_pla)`** més (de `r mil(pla0)` a `r mil(pla1)`). Quan molta més gent es disputa
+pràcticament les mateixes places, el resultat és inevitable: **les notes de tall pugen**.
+La mediana de la nota de tall ha passat de `r dec(med0)` (`r y0n`) a `r dec(med1)`
+(`r y1n`), i cada cop hi ha menys estudis que s'omplen sense competència.
+
+Aquests tres fets —més demanda, oferta estable i notes més altes— no són independents:
+formen **una sola cadena causal**. I no s'expliquen perquè l'alumnat arribi molt millor
+preparat: entre `r y0n` i `r y1n`, la nota d'accés mitjana de qui es presenta a les PAU
+només ha pujat `r dec(d_acc)` punts, davant dels `r dec(d_med)` que ha pujat la mediana
+del tall.
+
+## 1. La demanda d'estudis creix
+
+```{r fig-tisora}
+plot_tisora(s)
+```
+
+La línia vermella —els estudiants que demanen un grau públic en primera opció— puja de
+forma sostinguda. En canvi, la línia de **places** (blau fosc) és gairebé plana. La
+**matrícula de nou accés** (gris) segueix de prop les places: en un sistema amb *numerus
+clausus*, el nombre de matriculats està limitat per la capacitat, no per la demanda. Per
+això el senyal de creixement es veu, sobretot, en els **sol·licitants**.
+
+## 2. Les places es mantenen estables
+
+```{r fig-pressio}
+plot_pressio(s)
+```
+
+Amb una oferta gairebé congelada i una demanda creixent, la **pressió d'accés** —quants
+sol·licitants hi ha per cada plaça— augmenta. L'any `r y0d` hi havia `r dec(rat0)`
+sol·licitants per plaça; el `r y1d`, ja en són `r dec(rat1)`. No és que s'hagin retallat
+places (de fet han crescut lleugerament, sovint amb graus nous), sinó que **l'oferta no
+ha seguit el ritme de la demanda**.
+
+## 3. Les notes de tall pugen
+
+```{r fig-notes}
+plot_notes(s)
+```
+
+La conseqüència directa de tot plegat és que **entrar és més difícil**. La mediana de la
+nota de tall ha pujat de `r dec(med0)` a `r dec(med1)` punts (escala 5–14). La banda
+ombrejada mostra que la pujada no és d'uns pocs graus estrella, sinó de gairebé tota la
+distribució.
+
+### Quants estudis queden per damunt de cada llindar
+
+La mediana resumeix el centre, però amaga com s'ha mogut la resta. Una manera de veure-ho
+és comptar **quina proporció d'estudis supera cada llindar de nota**.
+
+```{r fig-llindars}
+plot_llindars(s)
+```
+
+El gràfic mostra dos moviments ben diferents:
+
+- **El gruix del sistema s'ha desplaçat cap amunt.** Els estudis que demanen un `r dec(8,0)`
+  o més han passat de ser una minoria (`r pct(getl(8, y0n))` el `r y0n`) a ser
+  **majoria** (`r pct(getl(8, y1n))` el `r y1n`). Dit d'una altra manera: el `r y0n` en el
+  `r pct(100 - getl(8, y0n))` dels graus s'hi entrava amb menys d'un 8; el `r y1n`, només
+  en el `r pct(100 - getl(8, y1n))`.
+- **La part alta, en canvi, ha tocat sostre i ha reculat.** Els estudis amb una nota de tall
+  de `r dec(12,0)` o més van arribar al màxim el `r yr_max12` (`r pct(pk12)`) i ara són el
+  `r pct(getl(12, y1n))`, poc més que el `r pct(getl(12, y0n))` del `r y0n`.
+
+Això matisa la lectura habitual. El que ha passat **no** és que un grapat de graus d'elit
+s'hagin tornat inabastables: és que **el mig del sistema ha pujat cap a on abans només hi
+havia els graus més demandats**. La competència no s'ha concentrat, s'ha **estès**.
+
+El pic de la part alta cap al `r yr_max12` i el descens posterior encaixen, a més, amb el
+que veurem a l'apartat 4: són els anys de les notes d'expedient més inflades.
+
+```{r taula-llindars}
+s$llindars |>
+  filter(year %in% c(y0n, 2020, y1n)) |>
+  select(llindar, year, pct) |>
+  mutate(pct = round(pct, 1)) |>
+  pivot_wider(names_from = year, values_from = pct) |>
+  mutate(`Canvi (pp)` = round(.data[[as.character(y1n)]] - .data[[as.character(y0n)]], 1)) |>
+  rename(`Nota de tall ≥` = llindar) |>
+  knitr::kable(
+    caption = paste0("% d'estudis amb la nota de tall igual o superior a cada llindar. ",
+                     "Base: tots els estudis oferts cada any (", n0, " el ", y0n,
+                     ", ", n1, " el ", y1n, ")."),
+    format.args = list(decimal.mark = ",")
+  )
+```
+
+```{r fig-infra}
+plot_infrademanda(s)
+```
+
+Un segon senyal apunta en la mateixa direcció: cada cop hi ha **menys estudis que s'omplen
+sense competència** (nota de tall al mínim de 5,0). Han passat de `r inf0` estudis el
+`r y0n` a `r inf1` el `r y1n`. És a dir, la competència no només s'intensifica als graus
+més demandats, sinó que s'estén a una part més gran del sistema.
+
+## 4. I les notes de l'alumnat? Pugen, però molt menys
+
+Hi ha una explicació alternativa que val la pena posar a prova: potser les notes de tall
+pugen simplement perquè **l'alumnat arriba amb millors notes**. Si tothom té millor
+expedient, el llistó puja encara que la competència no canviï. Les dades de les PAU
+permeten separar les dues coses.
+
+```{r fig-pau-presentats}
+plot_pau_presentats(s)
+```
+
+El primer que mostren és que **el col·lectiu que es presenta a les proves creix**: de
+`r mil(pre0)` presentats el `r y0n` a `r mil(pre1)` el `r y1n`, un **`r pct(g_pre)`** més.
+El salt del 2020 és especialment brusc. Aquest creixement alimenta la demanda que hem vist
+al primer gràfic —tot i que només en part, perquè al sistema també hi accedeix gent des de
+la formació professional i des d'altres vies: el `r y1n` hi havia `r mil(sol1)` sol·licitants
+i només `r mil(pre1)` presentats a les PAU.
+
+```{r fig-pau-notes}
+plot_pau_notes(s)
+```
+
+I aquí apareix el matís important. La **mitjana d'expedient de batxillerat** sí que puja de
+forma sostinguda (de `r dec(exp0)` a `r dec(exp1)`, `r dec(d_exp)` punts més): és el patró
+que se sol anomenar *inflació de notes*. En canvi, la **mitjana de les proves** no acompanya
+—de fet, baixa `r dec(abs(d_pro))` punts— i la distància entre les dues creix. Com que la
+nota d'accés pondera l'expedient (60%) i la prova (40%), el resultat net és una millora molt
+modesta: la **nota d'accés mitjana** només puja `r dec(d_acc)` punts en tota la dècada.
+
+```{r fig-pau-vs-tall}
+plot_pau_vs_tall(s)
+```
+
+La comparació és contundent. Entre `r y0n` i `r y1n` la mediana de la nota de tall ha pujat
+**`r dec(d_med)` punts**, mentre que la nota d'accés mitjana de l'alumnat només ha pujat
+**`r dec(d_acc)`**. Encara que atribuíssim tota aquesta millora a l'alumnat, explicaria
+aproximadament un **`r pct(quota)`** de la pujada del llistó. La resta és competència.
+
+El darrer any ho deixa encara més clar: amb el **model nou de PAU** (estrenat el juny de
+`r y1n`), la nota d'accés mitjana ha **baixat** `r dec(abs(d_acc_ult))` punts respecte a
+`r yprev` i, tot i així, la mediana de la nota de tall ha **pujat** `r dec(d_med_ult)`
+punts. Si el motor fos la inflació de notes, hauria d'haver passat exactament el contrari.
+
+En resum: l'alumnat que es presenta a les PAU és **més nombrós**, i això empeny la demanda;
+però **no és prou millor** com per explicar unes notes de tall que pugen moltes vegades
+més de pressa. La nota de tall no mesura el nivell de l'alumnat: mesura **quanta gent es queda
+fora**.
+
+## La cadena causal
+
+> **Més sol·licitants** competint per **una oferta de places estable** → **més pressió per
+> plaça** → **notes de tall més altes** i **menys estudis sense demanda**.
+
+Les notes de les PAU encaixen en aquesta cadena **pel costat de la demanda** (cada cop hi ha
+més presentats), no pel de les notes: la millora de l'expedient és massa petita, i massa
+compensada per unes proves que no pugen, per moure el llistó per si sola.
+
+L'excedent de demanda que no cap al sistema públic presencial es desplaça, en bona part,
+cap a altres vies (universitats privades i, molt especialment, la UOC), però aquesta és
+una altra història que queda fora de l'abast d'aquest informe.
+
+## Nota metodològica
+
+- **Abast**: sistema públic de preinscripció de Catalunya (les 7 universitats públiques,
+  la UVic-UCC i els centres adscrits). No s'hi inclouen universitats privades ni la UOC.
+- **Fonts** (pestanyes dels fitxers `Dades_20XX.xlsx` de l'Oficina d'Accés a la Universitat):
+  - *Sol·licitants en 1a preferència* (juny): pestanya **1.1.6**, un valor per any (`r y0d`–`r y1d`).
+  - *Places de preinscripció*: pestanya **1.1.5**, un valor per any (`r y0d`–`r y1d`). No
+    s'ha fet servir la pestanya 4.4 per al total perquè, als fitxers anteriors a 2023,
+    repeteix cada estudi en diversos blocs i en duplica la suma.
+  - *Matrícula de nou accés*: pestanya **7.5**, fila «Total universitats que participen»
+    (`r y0n`–`r y1n`).
+  - *Notes de tall*: pestanya **5.3** (`r y0n`–`r y1n`).
+- **PAU**: fitxer `01-dades/pau_cat_resultats_2010_2025.csv` (convocatòria ordinària de
+  juny, Catalunya). Els cursos s'han datat per l'**any de les proves** —el curs 2024/25
+  són les PAU del juny de 2025—, que és l'any que casa amb la preinscripció d'aquell estiu.
+  La sèrie va, doncs, de 2011 a 2026.
+- **Notes de tall**: els buits corresponen a estudis no oferts aquell any i s'exclouen. Els
+  valors inferiors a 5,0 d'alguns anys inicials són anòmals respecte a l'escala 5–14 i es
+  tracten com a terra (5,0). Es resumeixen amb la **mediana** i el rang interquartílic per
+  no deixar-se distorsionar pels canvis de composició de l'oferta.
+- **Comparació tall / nota d'accés**: són dues magnituds diferents i la comparació és
+  indicativa, no una descomposició exacta. La nota de tall és una **nota d'admissió**
+  (escala 5–14, hi compten les matèries de ponderació) i es refereix a **l'últim admès**
+  de cada estudi; la nota d'accés mitjana és una **mitjana de tot el col·lectiu** (escala
+  0–10) i només cobreix la via de batxillerat. Per això es comparen com a **canvis en punts
+  respecte a l'any base**, en comptes de nivells, i el `r pct(quota)` esmentat és un ordre
+  de magnitud —de fet, una **fita superior** generosa: una millora general de les notes es
+  trasllada al llistó com a molt punt per punt, i la nota d'accés només pesa una part de la
+  d'admissió.
+- **Reproduïbilitat**: tot el processament és a `02-code/` (`Rscript 02-code/run_analysis.R`)
+  i les dades tidy resultants a `04-output/series_2016_2025.csv`.
+
+```{r taula-series}
+library(dplyr); library(tidyr)
+tidy_series(s) |>
+  mutate(value = round(value, 3)) |>
+  pivot_wider(names_from = metric, values_from = value) |>
+  arrange(year) |>
+  knitr::kable(
+    caption = "Sèries resultants (buits = fora de la finestra de la sèrie).",
+    format.args = list(big.mark = ".", decimal.mark = ",")
+  )
+```
