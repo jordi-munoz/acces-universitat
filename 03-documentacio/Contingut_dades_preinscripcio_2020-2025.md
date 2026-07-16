@@ -1,6 +1,8 @@
 # Contingut dels fitxers de dades de preinscripció (2020-2025)
 
-Aquest document descriu el contingut de cadascuna de les pestanyes dels fitxers `Dades_20XX.xlsx` de la carpeta [01-dades](../01-dades/), elaborat a partir de les notes metodològiques oficials (`03-documentacio/Nota_metodologica_20XX.pdf`) i de la inspecció directa de les capçaleres de cada pestanya dels sis fitxers Excel.
+Aquest document descriu el contingut de cadascuna de les pestanyes dels fitxers `Dades_20XX.xlsx` de la carpeta [01-dades](../01-dades/), elaborat a partir de les [notes metodològiques oficials](#5-fonts) de l'OAU i de la inspecció directa de les capçaleres de cada pestanya dels sis fitxers Excel.
+
+> **Nota**: ni els fitxers `Dades_20XX.xlsx` ni les notes metodològiques en PDF es versionen en aquest repositori (són fitxers de tercers). A l'apartat [§5 Fonts](#5-fonts) hi ha l'enllaç a l'original de cada any.
 
 ## 1. Origen i abast de les dades
 
@@ -137,6 +139,20 @@ Cada fitxer `Dades_20XX.xlsx` correspon a l'edició d'un any de la preinscripci�
 
 ## 5. Fonts
 
-- Fitxers de dades: [01-dades/Dades_2020.xlsx](../01-dades/Dades_2020.xlsx) … [01-dades/Dades_2025.xlsx](../01-dades/Dades_2025.xlsx)
-- Notes metodològiques oficials: `Nota_metodologica_2020.pdf` a `Nota_metodologica_2025.pdf`, en aquesta mateixa carpeta.
+Tot el material original és de l'**Oficina d'Accés a la Universitat** (Consell Interuniversitari de Catalunya) i es pot descarregar del seu portal: [Informes i estadístiques de la preinscripció universitària](https://universitats.gencat.cat/ca/altres_pagines/informe_i_estadistiques/informes_i_estad_pre/index.html).
+
+- **Fitxers de dades**: `Dades_2020.xlsx` … `Dades_2025.xlsx`, descarregables del portal enllaçat més amunt i que cal desar a [`01-dades/`](../01-dades/) (vegeu el [README](../README.md#dades-dentrada)).
+- **Notes metodològiques oficials** (una per any):
+
+  | Any | Nota metodològica |
+  |---|---|
+  | 2020 | [Nota_metodologica_2020.pdf](https://universitats.gencat.cat/web/.content/01_acces_i_admissio/preinscripcions/documentacio/informe_PRE/2020/Nota_metodologica_2020.pdf) |
+  | 2021 | [Nota_metodologica_2021.pdf](https://universitats.gencat.cat/web/.content/01_acces_i_admissio/preinscripcions/documentacio/informe_PRE/2021/Nota_metodologica_2021.pdf) |
+  | 2022 | [Nota_metodologica_2022.pdf](https://universitats.gencat.cat/web/.content/01_acces_i_admissio/preinscripcions/documentacio/informe_PRE/2022/Nota_metodologica_2022.pdf) |
+  | 2023 | [Nota_metodologica_2023.pdf](https://universitats.gencat.cat/web/.content/01_acces_i_admissio/preinscripcions/documentacio/informe_PRE/2023/Nota_metodologica_2023.pdf) |
+  | 2024 | [Nota_metodologica_2024.pdf](https://universitats.gencat.cat/web/.content/01_acces_i_admissio/preinscripcions/documentacio/informe_PRE/2024/Nota_metodologica_2024.pdf) |
+  | 2025 | [Nota_metodologica_2025.pdf](https://universitats.gencat.cat/web/.content/01_acces_i_admissio/preinscripcions/documentacio/informe_PRE/2025/Nota_metodologica_2025.pdf) |
+
+  El portal també en publica de 2014 a 2019, per si es vol allargar la sèrie.
+
 - Estructura de pestanyes i capçaleres verificades directament sobre els fitxers Excel (Python/openpyxl).

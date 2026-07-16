@@ -8,6 +8,10 @@
 # l'apartat de les PAU (no es pot descarregar de cap altre lloc).
 !01-dades/pau_cat_resultats_2010_2025.csv
 
+# Notes metodològiques oficials de l'OAU: també són fitxers de tercers.
+# El README i 03-documentacio/ n'enllacen l'original any per any.
+03-documentacio/Nota_metodologica_*.pdf
+
 # Configuració local de Claude Code (conté rutes de la màquina, no del projecte)
 .claude/
 

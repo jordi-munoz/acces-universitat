@@ -28,7 +28,8 @@ va **baixar** mentre la nota de tall **pujava**.
   report.qmd         Informe (Quarto)
   run_analysis.R     Pipeline complet
   tests/             Proves (testthat) amb xifres de referència
-03-documentacio/   Notes metodològiques oficials i descripció de les pestanyes
+03-documentacio/   Descripció de les pestanyes dels Excel + enllaços a les
+                   notes metodològiques oficials
 04-output/         Resultats: informe HTML, figures i sèries en CSV
 ```
 
@@ -97,7 +98,10 @@ Rscript 02-code/tests/testthat.R
   estudi vs la mitjana de tot el col·lectiu de batxillerat). Per això es comparen com a
   canvis en punts respecte a l'any base.
 - Hi ha més detall a l'apartat «Nota metodològica» de l'informe i a
-  [`03-documentacio/`](03-documentacio/).
+  [`03-documentacio/`](03-documentacio/Contingut_dades_preinscripcio_2020-2025.md), que
+  descriu pestanya per pestanya els Excel de l'OAU i enllaça la **nota metodològica oficial
+  de cada any** (2020–2025). Els PDF no es versionen aquí: són de l'OAU i s'enllacen des del
+  seu portal.
 
 ## Fonts
 
