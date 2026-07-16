@@ -1,3 +1,7 @@
+# Dades d'entrada: no es versionen (fitxers de tercers, ~60 MB).
+# Vegeu "Dades d'entrada" al README per saber d'on descarregar-les.
+01-dades/
+
 # Configuració local de Claude Code (conté rutes de la màquina, no del projecte)
 .claude/
 
