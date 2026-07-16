@@ -1,0 +1,17 @@
+# Configuració local de Claude Code (conté rutes de la màquina, no del projecte)
+.claude/
+
+# Artefactes de render de Quarto
+/.quarto/
+/02-code/.quarto/
+*_files/
+
+# R
+.Rproj.user/
+.Rhistory
+.RData
+
+# OneDrive / Windows
+desktop.ini
+Thumbs.db
+~$*
