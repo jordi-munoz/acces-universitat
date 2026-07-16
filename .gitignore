@@ -1,6 +1,12 @@
-# Dades d'entrada: no es versionen (fitxers de tercers, ~60 MB).
-# Vegeu "Dades d'entrada" al README per saber d'on descarregar-les.
-01-dades/
+# Dades d'entrada: els Excel de l'OAU no es versionen (fitxers de tercers, ~60 MB).
+# Vegeu "Dades d'entrada" al README per saber d'on descarregar-los.
+# S'ignora el CONTINGUT de la carpeta, no la carpeta: si s'exclogués el
+# directori, git no permetria tornar a incloure'n cap fitxer amb "!".
+01-dades/*
+
+# Excepció: compilació pròpia i petita, i sense ella no es pot reproduir
+# l'apartat de les PAU (no es pot descarregar de cap altre lloc).
+!01-dades/pau_cat_resultats_2010_2025.csv
 
 # Configuració local de Claude Code (conté rutes de la màquina, no del projecte)
 .claude/

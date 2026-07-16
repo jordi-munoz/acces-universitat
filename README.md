@@ -34,22 +34,24 @@ va **baixar** mentre la nota de tall **pujava**.
 
 ## Dades d'entrada
 
-**La carpeta `01-dades/` no es versiona** (vegeu [`.gitignore`](.gitignore)). Són fitxers de
+**Els Excel de l'OAU no es versionen** (vegeu [`.gitignore`](.gitignore)): són fitxers de
 tercers, d'uns 60 MB, i aquest repositori prefereix **enllaçar-ne la font original** en
 comptes de redistribuir-los. Els resultats processats sí que es versionen, a
 [`04-output/series_2016_2025.csv`](04-output/series_2016_2025.csv): es poden consultar les
 sèries sense necessitat de descarregar res.
 
-Per reproduir l'anàlisi des de zero calen dues coses a `01-dades/`:
+Per reproduir l'anàlisi des de zero només cal **descarregar els Excel**; l'altre fitxer de
+dades ja és al repositori.
 
-**1. `Dades_2020.xlsx` … `Dades_2025.xlsx`** — un fitxer per any, descarregables de
+**1. `Dades_2020.xlsx` … `Dades_2025.xlsx`** *(cal descarregar-los)* — un fitxer per any, a
 [Informes i estadístiques de la preinscripció universitària][oau] (OAU, Departament de
-Recerca i Universitats). Cal desar-los amb aquests noms exactes: el codi n'extreu l'any del
-nom del fitxer.
+Recerca i Universitats). Cal desar-los a `01-dades/` amb aquests noms exactes: el codi
+n'extreu l'any del nom del fitxer.
 
-**2. `pau_cat_resultats_2010_2025.csv`** — resultats agregats de les PAU a Catalunya
-(convocatòria ordinària de juny), recollits de les publicacions de resultats de les PAU.
-És una compilació pròpia; el format esperat és:
+**2. [`01-dades/pau_cat_resultats_2010_2025.csv`](01-dades/pau_cat_resultats_2010_2025.csv)**
+*(ja inclòs)* — resultats agregats de les PAU a Catalunya (convocatòria ordinària de juny).
+És una compilació pròpia i no es pot descarregar d'una sola font, per això sí que es
+versiona, tot i ser a la mateixa carpeta. El format és:
 
 | Columna | Descripció |
 |---|---|
