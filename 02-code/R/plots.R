@@ -255,6 +255,54 @@ plot_pau_vs_tall <- function(s) {
     tema_divulgatiu()
 }
 
+# 5. Projecció de la demanda a partir de les cohorts escolars -----------------
+# Rep la taula de build_forecast.R (històric + projecció en format llarg).
+plot_projeccio <- function(taula) {
+  hist <- filter(taula, tipus == "històric")
+  proj <- filter(taula, tipus != "històric")
+  # El darrer any observat s'afegeix a l'inici de la projecció perquè les línies
+  # es toquin: si no, el salt entre trams sembla una discontinuïtat de la sèrie.
+  pont <- transmute(slice_max(hist, year, n = 1),
+                    year, solicitants, baix = solicitants, alt = solicitants,
+                    sense_creixement_cohort = solicitants)
+  proj_c <- bind_rows(pont, select(proj, year, solicitants, baix, alt,
+                                   sense_creixement_cohort))
+  tall <- max(hist$year)
+
+  ggplot(mapping = aes(year)) +
+    geom_ribbon(data = proj_c, aes(ymin = baix, ymax = alt),
+                fill = COL_DEMANDA, alpha = 0.15) +
+    geom_vline(xintercept = tall + 0.5, color = "grey75", linewidth = 0.4) +
+    geom_line(data = proj_c, aes(y = sense_creixement_cohort,
+                                 color = "Escenari sense creixement de cohort"),
+              linewidth = 0.8, linetype = "dotted") +
+    geom_line(data = proj_c, aes(y = solicitants, color = "Projecció central"),
+              linewidth = 1.1, linetype = "22") +
+    geom_line(data = hist, aes(y = solicitants, color = "Observat"), linewidth = 1.1) +
+    geom_point(data = hist, aes(y = solicitants, color = "Observat"), size = 2.2) +
+    annotate("text", x = tall + 0.7, y = 0, hjust = 0, vjust = -0.5,
+             label = "projecció", size = 3.2, color = "grey45") +
+    scale_color_manual(values = c(
+      "Observat"                            = COL_DEMANDA,
+      "Projecció central"                   = COL_DEMANDA,
+      "Escenari sense creixement de cohort" = COL_OFERTA
+    )) +
+    scale_x_continuous(breaks = seq(2020, max(proj$year), 2)) +
+    scale_y_continuous(labels = fmt_mil, limits = c(0, NA)) +
+    labs(
+      title = "La demanda universitària toca sostre: la davallada ja és a les aules",
+      subtitle = paste0("Sol·licitants en 1a preferència a les universitats públiques.\n",
+                        "Projecció a partir de les cohorts ja escolaritzades el curs 2025/2026"),
+      x = NULL, y = "Sol·licitants",
+      caption = paste0(
+        "Font: Oficina d'Accés a la Universitat i dades obertes del Departament d'Educació. Elaboració pròpia.\n",
+        "Banda: recorregut històric de la ràtio sol·licitants / batxillerat 2n (2020-2025), no és un interval de confiança.\n",
+        "Només universitats públiques: s'exclou la UVic-UCC.")
+    ) +
+    tema_divulgatiu() +
+    theme(legend.position = "top")
+}
+
 # Desa totes les figures com a PNG a out_dir/figures/ -------------------------
 save_figures <- function(s, out_dir, width = 8, height = 4.8, dpi = 150) {
   fig_dir <- file.path(out_dir, "figures")

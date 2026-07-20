@@ -7,13 +7,13 @@ dades de preinscripció de l'**Oficina d'Accés a la Universitat** (OAU), 2016�
 
 ## Què hi trobareu
 
-Entre 2020 i 2025 els sol·licitants en 1a preferència van créixer un 13% (de 55.815 a
-63.038) mentre l'oferta de places només ho feia un 4% (de 40.213 a 41.801). La conseqüència
-és que la mediana de la nota de tall ha passat de 5,92 (2016) a 8,20 (2025).
+Entre 2020 i 2025 els sol·licitants en 1a preferència van créixer un 12% (de 53.545 a
+59.824) mentre l'oferta de places només ho feia un 2% (de 38.071 a 38.731). La conseqüència
+és que la mediana de la nota de tall ha passat de 6,21 (2016) a 8,41 (2025).
 
 L'informe posa a prova l'explicació alternativa —que les notes de tall pugin perquè
 l'alumnat arriba amb millors notes— i la descarta: en el mateix període, la nota d'accés
-mitjana de qui es presenta a les PAU només va pujar 0,14 punts, davant dels 2,28 de la
+mitjana de qui es presenta a les PAU només va pujar 0,14 punts, davant dels 2,20 de la
 mediana del tall. El curs 2025, amb el model nou de PAU, la nota d'accés mitjana fins i tot
 va **baixar** mentre la nota de tall **pujava**.
 
@@ -22,12 +22,16 @@ va **baixar** mentre la nota de tall **pujava**.
 ```
 01-dades/          Dades d'entrada (NO versionades, vegeu més avall)
 02-code/
-  R/read_sheets.R    Lectors de les pestanyes dels Excel de l'OAU
-  R/build_series.R   Construcció de les sèries temporals
-  R/plots.R          Figures (ggplot2)
-  report.qmd         Informe (Quarto)
-  run_analysis.R     Pipeline complet
-  tests/             Proves (testthat) amb xifres de referència
+  R/read_sheets.R      Lectors de les pestanyes dels Excel de l'OAU
+  R/build_series.R     Construcció de les sèries temporals
+  R/plots.R            Figures (ggplot2)
+  R/read_matriculats.R Lectura i agregació dels alumnes matriculats (dades obertes)
+  R/forecast_demanda.R Model de projecció de la demanda a partir de les cohorts
+  report.qmd           Informe (Quarto)
+  run_analysis.R       Pipeline complet de l'informe
+  build_matriculats.R  Sèrie d'alumnes per ensenyament i nivell
+  build_forecast.R     Projecció de la demanda 2026-2037
+  tests/               Proves (testthat) amb xifres de referència
 03-documentacio/   Descripció de les pestanyes dels Excel + enllaços a les
                    notes metodològiques oficials
 04-output/         Resultats: informe HTML, figures i sèries en CSV
@@ -68,12 +72,61 @@ versiona, tot i ser a la mateixa carpeta. El format és:
 > l'any que casa amb la preinscripció d'aquell estiu. El codi data cada fila per l'any de
 > les proves, de manera que la sèrie va de 2011 a 2026. Hi ha una prova que ho verifica.
 
+**3. `01-dades/Alumnes_matriculats_per_ensenyament_i_unitats_dels_centres_docents_*.csv`**
+*(cal descarregar-lo)* — dades obertes del Departament d'Educació i Formació Professional
+([portal de dades obertes de la Generalitat][odg]), ~170 MB. **No es versiona**, però la
+sèrie agregada que se'n deriva sí:
+[`04-output/alumnes_per_ensenyament_nivell.csv`](04-output/alumnes_per_ensenyament_nivell.csv).
+Alimenta una sèrie independent de l'informe de preinscripció.
+
+[odg]: https://analisi.transparenciacatalunya.cat/
+
+### Alumnes matriculats per ensenyament i nivell
+
+`build_matriculats.R` redueix el fitxer d'origen —una fila per centre × ensenyament ×
+nivell × modalitat × període— a **alumnes per ensenyament i nivell, per curs** (11.416
+files, cursos 2015/2016–2025/2026):
+
+| Columna | Descripció |
+|---|---|
+| `curs` | Curs escolar (`2024/2025`) |
+| `any` | Any d'inici del curs, tal com ve a l'origen |
+| `nom_estudis` | Categoria àmplia (`EDUCACIÓ PRIMÀRIA`, `FORMACIÓ PROFESSIONAL`…) |
+| `nom_ensenyament` | Ensenyament concret |
+| `nivell` | Nivell dins l'ensenyament; **buit** si l'ensenyament no en té (adults, idiomes) |
+| `alumnes` | Alumnes matriculats |
+| `alumnes_dones`, `alumnes_homes` | Desglossament per sexe |
+| `unitats` | Grups-classe |
+| `n_centres` | Centres diferents que imparteixen aquell ensenyament i nivell |
+
+La clau (`curs`, `nom_ensenyament`, `nivell`) és **única**, i cada ensenyament penja d'un
+sol `nom_estudis`. Se suma sobre modalitat (presencial, lliure, a distància) i sobre
+període de matrícula.
+
+> ⚠️ **El curs 2025/2026 és provisional i NO és comparable amb els anteriors.** Al fitxer
+> del 20/07/2026 hi falta gairebé tota la **formació professional** (2.907 alumnes davant de
+> 173.298 el curs anterior: un 2%) i **vuit categories senceres** —educació d'adults
+> (reglada i no reglada), música, dansa, ensenyaments esportius, art dramàtic, ensenyaments
+> superiors de disseny i conservació i restauració. Per això el total del curs és d'1,19
+> milions d'alumnes en comptes d'~1,5. Els ensenyaments obligatoris (infantil, primària,
+> ESO, batxillerat) hi són al 95–97%. `build_matriculats.R` avisa d'aquest desajust en
+> executar-se, i hi ha una prova que el detecta.
+
+Dues coses més que el codi resol i que convé saber si es toca el fitxer d'origen:
+
+- Els comptatges de 1.000 o més porten **coma de milers** (`"1,365"` = 1365). Amb
+  `as.numeric()` directe es convertirien en `NA` —i es perdrien justament els centres més
+  grans, com Ilerna—; amb una locale de coma decimal, en 1,365. Ho tracta `parse_num()`.
+- Les files **sense `Nom ensenyament`** (unitats registrades sense ensenyament associat) es
+  descarten: sumen 1 alumne en tot el fitxer i eren l'únic cas que trencava la unicitat de
+  la clau.
+
 [oau]: https://universitats.gencat.cat/ca/altres_pagines/informe_i_estadistiques/informes_i_estad_pre/index.html
 
 ## Com reproduir-ho
 
-Cal **R** (≥ 4.4) i, per a l'informe, **Quarto**. Paquets: `readxl`, `dplyr`, `tidyr`,
-`stringr`, `purrr`, `ggplot2`, `scales`, `knitr`, `testthat`.
+Cal **R** (≥ 4.4) i, per a l'informe, **Quarto**. Paquets: `readxl`, `readr`, `dplyr`,
+`tidyr`, `stringr`, `purrr`, `ggplot2`, `scales`, `knitr`, `testthat`.
 
 ```bash
 # 1. Sèries + figures -> 04-output/
@@ -84,7 +137,60 @@ quarto render 02-code/report.qmd --output-dir ../04-output
 
 # 3. Proves (xifres de referència comprovades sobre els Excel)
 Rscript 02-code/tests/testthat.R
+
+# 4. (Opcional, independent de l'informe) Alumnes per ensenyament i nivell
+#    -> 04-output/alumnes_per_ensenyament_nivell.csv
+Rscript 02-code/build_matriculats.R
+
+# 5. Projecció de la demanda 2026-2037 (necessita el pas 4)
+#    -> 04-output/projeccio_demanda.csv + figures/fig_projeccio.png
+Rscript 02-code/build_forecast.R
 ```
+
+## Projecció de la demanda (2026–2037)
+
+`build_forecast.R` projecta els sol·licitants futurs a partir d'un fet senzill: **qui
+sol·licitarà plaça d'aquí a dotze anys ja és a l'escola avui**. Les cohorts no cal
+predir-les, es poden comptar; el que s'ha d'estimar és només la part del trajecte que
+encara no han fet.
+
+```
+nivell actual --(ràtios de progressió)--> batxillerat 2n --(yield)--> sol·licitants
+```
+
+- **Ràtios de progressió de cohort**: alumnes al nivell següent l'any següent / alumnes al
+  nivell actual. Recullen alhora repetició, abandonament i migració neta. Dins de primària
+  i ESO són molt estables (desviació 0,007–0,023) i s'hi pren la mitjana dels 5 anys
+  recents.
+- **Yield**: sol·licitants de l'any *T* / alumnes de batxillerat 2n del curs *T−1*. És
+  **1,21 de mitjana** (recorregut 1,18–1,26) i val més d'1 perquè als sol·licitants s'hi
+  sumen les altres vies d'accés —sobretot CFGS— i qui repeteix convocatòria.
+
+**Per què es projecta via batxillerat i no directament des d'ESO 4t.** Es van provar els
+dos models. El yield del batxillerat 2n és pla (pendent no significatiu, p = 0,83); el
+d'ESO 4t deriva a la baixa de forma apreciable (p = 0,07) perquè absorbeix la caiguda del
+pes del batxillerat. En proves *walk-forward* —estimant el yield només amb anys anteriors
+al que es prediu— l'error mitjà és del **3,2%** amb el model de batxillerat i del **4,6%**
+amb el d'ESO 4t. La projecció de cohorts, per si sola, encerta entre −1,7% i +2,7% a
+horitzons de 3 a 8 anys.
+
+**La incertesa que domina no és demogràfica.** Els alumnes que sostenen la demanda fins al
+2028 ja estan **comptats** al curs 2025/2026 (batxillerat 2n, batxillerat 1r i ESO 4t). Ara
+bé, només el **2026** no depèn de cap ràtio: el 2027 hi passa la conversió batxillerat
+1r → 2n, i el 2028 hi afegeix la d'ESO 4t → batxillerat 1r. A partir del 2029 hi entra
+també la cadena de primària i ESO. Els dos supòsits que més hi pesen:
+
+- **ESO 4t → batxillerat 1r cau de forma sostinguda** (0,704 el 2015 → 0,596 el 2024): cada
+  cop més alumnes trien FP. Es fixa en el darrer valor observat en comptes d'extrapolar-ne
+  la caiguda dotze anys, i perquè una part dels qui van a FP tornen al sistema universitari
+  per la via dels CFGS —que el yield ja recull.
+- **Les cohorts creixen en avançar** (una cohort guanya ~13% de primària 1r a ESO 4t), cosa
+  que reflecteix sobretot migració neta. La columna `sense_creixement_cohort` en dóna
+  l'escenari contrari, amb aquest guany anul·lat.
+
+> La banda `baix`–`alt` és el **recorregut històric observat** del yield (6 anys), no un
+> interval de confiança: amb sis observacions, posar-hi una probabilitat seria fingir una
+> precisió que no hi és.
 
 ## Notes metodològiques
 
