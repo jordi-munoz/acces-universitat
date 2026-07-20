@@ -63,30 +63,60 @@ CUTOFF_FLOOR <- 5.0
 # Tots són > CUTOFF_FLOOR, així que el terra de 5,0 no els afecta.
 CUTOFF_THRESHOLDS <- c(6, 7, 8, 9, 10, 11, 12)
 
+# L'informe es limita a les universitats *públiques*. La UVic-UCC participa a la
+# preinscripció però és de titularitat privada (Fundació Universitària Balmes),
+# així que els seus estudis s'exclouen de totes les sèries.
+#
+# S'exclouen només els estudis on la UVic-UCC és l'única universitat: els graus
+# compartits amb una universitat pública (UAB/UVic) es mantenen, perquè els
+# imparteix també una pública i perquè al full 7.5 els estudis compartits van
+# tots a la fila "Agrupació d'universitats", que no es pot desagregar per
+# universitat. Mantenir-los és, doncs, l'únic criteri aplicable a totes les
+# sèries per igual.
+#
+# Les etiquetes són noms complets a 1.1.5 i 5.3 ("Universitat de Vic-...") i
+# sigles a 1.1.6 ("UVic-UCC"); la barra marca els estudis compartits.
+is_uvic_only <- function(universitat) {
+  str_detect(universitat, stringr::fixed("Vic")) & !str_detect(universitat, stringr::fixed("/"))
+}
+
+# Treu de la taula els estudis exclusius de la UVic-UCC.
+drop_uvic <- function(df) filter(df, !is_uvic_only(universitat))
+
 build_all <- function(data_dir = find_data_dir()) {
   files  <- sort(list.files(data_dir, pattern = "^Dades_20\\d\\d\\.xlsx$", full.names = TRUE))
   latest <- files[which.max(year_from_file(files))]
 
-  # oferta i demanda (un punt per fitxer)
+  # oferta i demanda (un punt per fitxer), només universitats públiques
   oferta <- map_dfr(files, read_places) |>
+    drop_uvic() |>
     group_by(year) |>
     summarise(places = sum(places), n_estudis = n(), .groups = "drop")
 
   demanda <- map_dfr(files, read_applicants) |>
+    drop_uvic() |>
     group_by(year) |>
     summarise(solicitants = sum(solicitants), .groups = "drop")
 
   pressio <- inner_join(select(oferta, year, places), demanda, by = "year") |>
     mutate(ratio = solicitants / places)
 
-  # matrícula participants (sèrie completa del fitxer més recent)
+  # matrícula participants (sèrie completa del fitxer més recent). El full 7.5
+  # no es pot filtrar per estudi: es resta la fila de la UVic-UCC del total de
+  # participants (la del bloc de participants, no la del bloc de sota).
   enrol_all <- read_enrolment(latest)
   matricula <- enrol_all |>
-    filter(str_detect(universitat, "^Total universitats que participen")) |>
-    transmute(year, matricula)
+    filter(bloc_participants) |>
+    group_by(year) |>
+    summarise(
+      matricula = sum(matricula[str_detect(universitat, "^Total universitats que participen")]) -
+                  sum(matricula[is_uvic_only(universitat)]),
+      .groups = "drop"
+    )
 
-  # notes de tall: resum anual
+  # notes de tall: resum anual, només universitats públiques
   cutoff_raw <- read_cutoff(latest) |>
+    drop_uvic() |>
     mutate(nota_adj = pmax(nota, CUTOFF_FLOOR))
 
   notes <- cutoff_raw |>

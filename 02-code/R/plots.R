@@ -58,9 +58,10 @@ plot_tisora <- function(s) {
     scale_y_continuous(labels = fmt_mil, limits = c(0, NA)) +
     labs(
       title = "La demanda creix; l'oferta de places, gairebé congelada",
-      subtitle = "Sistema públic de preinscripció de Catalunya",
+      subtitle = "Universitats públiques de Catalunya",
       x = NULL, y = "Nombre d'estudiants",
-      caption = "Font: Oficina d'Accés a la Universitat. Sol·licitants i places: pestanyes 1.1.6 i 1.1.5."
+      caption = paste0("Font: Oficina d'Accés a la Universitat. Sol·licitants i places: pestanyes 1.1.6 i 1.1.5.\n",
+                       "Només universitats públiques: s'exclou la UVic-UCC.")
     ) +
     tema_divulgatiu()
 }
@@ -78,7 +79,8 @@ plot_pressio <- function(s) {
       title = "Cada cop més sol·licitants per plaça",
       subtitle = "Ràtio de sol·licitants en 1a preferència per plaça oferta",
       x = NULL, y = "Sol·licitants / plaça",
-      caption = "Font: Oficina d'Accés a la Universitat. Elaboració pròpia (1.1.6 / 1.1.5)."
+      caption = paste0("Font: Oficina d'Accés a la Universitat. Elaboració pròpia (1.1.6 / 1.1.5).\n",
+                       "Només universitats públiques: s'exclou la UVic-UCC.")
     ) +
     tema_divulgatiu()
 }
@@ -96,7 +98,8 @@ plot_notes <- function(s) {
       title = "Les notes de tall pugen",
       subtitle = "Mediana de la nota de tall (banda: 1r-3r quartil). Escala 5-14",
       x = NULL, y = "Nota de tall",
-      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3). Valors < 5 tractats com a terra 5,0."
+      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3). Valors < 5 tractats com a terra 5,0.\n",
+                       "Només universitats públiques: s'exclou la UVic-UCC.")
     ) +
     tema_divulgatiu()
 }
@@ -135,7 +138,8 @@ plot_llindars <- function(s, llindars = LLINDARS_PLOT) {
       title = "La pujada arrossega tota la distribució, no només els graus d'elit",
       subtitle = "% d'estudis amb la nota de tall igual o superior a cada llindar (escala 5-14)",
       x = NULL, y = "% d'estudis",
-      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3). Elaboració pròpia."
+      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3). Elaboració pròpia.\n",
+                       "Només universitats públiques: s'exclou la UVic-UCC.")
     ) +
     tema_divulgatiu()
 }
@@ -154,7 +158,8 @@ plot_infrademanda <- function(s) {
       title = "Cada cop menys estudis queden per sota de la competència",
       subtitle = "% d'estudis amb nota de tall al mínim (5,0), és a dir, sense excés de demanda",
       x = NULL, y = "% d'estudis",
-      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3)."
+      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3).\n",
+                       "Només universitats públiques: s'exclou la UVic-UCC.")
     ) +
     tema_divulgatiu()
 }
@@ -244,7 +249,8 @@ plot_pau_vs_tall <- function(s) {
       subtitle = paste0("Canvi acumulat en punts respecte a ", y0,
                         " (dues escales diferents, mateixa base)"),
       x = NULL, y = paste0("Punts de canvi des de ", y0),
-      caption = "Font: Oficina d'Accés a la Universitat (5.3) i resultats de les PAU. Elaboració pròpia."
+      caption = paste0("Font: Oficina d'Accés a la Universitat (5.3) i resultats de les PAU. Elaboració pròpia.\n",
+                       "Notes de tall: només universitats públiques (s'exclou la UVic-UCC).")
     ) +
     tema_divulgatiu()
 }

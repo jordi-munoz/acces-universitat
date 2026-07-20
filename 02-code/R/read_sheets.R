@@ -54,6 +54,15 @@ row_of_cell <- function(m, pattern) {
 # Vector lògic: TRUE si el text és un codi d'estudi de 5 xifres.
 is_study_code <- function(x) !is.na(x) & stringr::str_detect(x, "^[0-9]{5}$")
 
+# Als fulls 1.1.5 i 5.3 la universitat no és una columna: és una fila de secció
+# dins la columna de codis ("Universitat de Barcelona", i tot seguit els seus
+# estudis). Propaga cap avall l'última capçalera de secció vista, de manera que
+# cada codi d'estudi queda etiquetat amb la seva universitat.
+carry_section_labels <- function(x) {
+  lab <- ifelse(is_study_code(x) | is.na(x) | !nzchar(trimws(x)), NA_character_, trimws(x))
+  c(NA_character_, lab[!is.na(lab)])[cumsum(!is.na(lab)) + 1L]
+}
+
 # Extreu l'any (20XX) del nom del fitxer.
 year_from_file <- function(path) as.integer(stringr::str_extract(basename(path), "20\\d\\d"))
 
@@ -65,24 +74,30 @@ read_places <- function(path) {
   m <- read_raw_matrix(path, "1.1.5")
   code_col  <- col_of_header(m, "^Codi$")
   place_col <- col_of_header(m, "Places")
+  univ <- carry_section_labels(m[, code_col])
   keep <- is_study_code(m[, code_col])
   tibble(
-    year   = year_from_file(path),
-    codi   = m[keep, code_col],
-    places = suppressWarnings(as.numeric(m[keep, place_col]))
+    year        = year_from_file(path),
+    codi        = m[keep, code_col],
+    universitat = univ[keep],
+    places      = suppressWarnings(as.numeric(m[keep, place_col]))
   ) |>
     filter(!is.na(places))
 }
 
 # 1.1.6 -> sol·licitants en 1a preferència (juny) per estudi. Columna "Total".
+# A diferència de 1.1.5 i 5.3, aquí la universitat sí que és una columna pròpia,
+# però amb sigles ("UB", "UVic-UCC") i amb salts de línia als estudis compartits.
 read_applicants <- function(path) {
   m <- read_raw_matrix(path, "1.1.6")
   code_col  <- col_of_header(m, "^Codi$")
   total_col <- col_of_header(m, "^Total$")
+  univ_col  <- col_of_header(m, "Sigles")
   keep <- is_study_code(m[, code_col])
   tibble(
     year        = year_from_file(path),
     codi        = m[keep, code_col],
+    universitat = stringr::str_squish(m[keep, univ_col]),
     solicitants = suppressWarnings(as.numeric(m[keep, total_col]))
   ) |>
     filter(!is.na(solicitants))
@@ -102,9 +117,15 @@ read_enrolment <- function(path) {
   data_rows <- which(!is.na(m[, label_col]) & nzchar(trimws(m[, label_col])))
   data_rows <- data_rows[data_rows > hdr_row]
 
+  # El full repeteix algunes universitats en dos blocs: primer les que participen
+  # a la preinscripció (fins a la fila de total, inclosa) i després els centres
+  # que no hi participen. La UVic-UCC hi surt dues vegades, i només la primera
+  # compta dins del total de participants: cal poder distingir-les.
+  total_row <- row_of_cell(m, "^Total universitats que participen")
   purrr_rows <- lapply(data_rows, function(r) {
     vals <- suppressWarnings(as.numeric(m[r, y_cols]))
-    tibble(universitat = trimws(m[r, label_col]), year = years, matricula = vals)
+    tibble(universitat = trimws(m[r, label_col]), bloc_participants = r <= total_row,
+           year = years, matricula = vals)
   })
   bind_rows(purrr_rows) |>
     filter(!is.na(matricula))
@@ -139,11 +160,13 @@ read_cutoff <- function(path) {
   years  <- as.integer(m[hdr_row, year_cells[, "col"]])
   y_cols <- year_cells[, "col"]
 
+  univ <- carry_section_labels(m[, code_col])
   keep <- which(is_study_code(m[, code_col]))
   rows <- lapply(keep, function(r) {
     vals <- suppressWarnings(as.numeric(m[r, y_cols]))
     tibble(
-      codi  = m[r, code_col],
+      codi        = m[r, code_col],
+      universitat = univ[r],
       tipus = if (!is.na(type_col)) trimws(m[r, type_col]) else NA_character_,
       year  = years,
       nota  = vals

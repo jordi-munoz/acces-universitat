@@ -88,8 +88,12 @@ Rscript 02-code/tests/testthat.R
 
 ## Notes metodològiques
 
-- **Abast**: les 7 universitats públiques catalanes, la UVic-UCC i els centres adscrits. No
-  s'hi inclouen les universitats privades ni la UOC.
+- **Abast**: les 7 universitats públiques catalanes i els seus centres adscrits. **S'exclou
+  la UVic-UCC**, que participa a la preinscripció però és de titularitat privada, i tampoc
+  s'hi inclouen la resta d'universitats privades ni la UOC. L'exclusió afecta els estudis on
+  la UVic-UCC és l'única universitat; els graus compartits amb una pública (UAB/UVic) es
+  mantenen. Les dades d'origen sí que inclouen la UVic-UCC: el filtre s'aplica en construir
+  les sèries (`is_uvic_only()` a [`02-code/R/build_series.R`](02-code/R/build_series.R)).
 - Les **notes de tall** es resumeixen amb la mediana i el rang interquartílic per no
   distorsionar-se amb els canvis de composició de l'oferta. Els valors inferiors a 5,0
   d'alguns anys inicials són anòmals respecte a l'escala 5–14 i es tracten com a terra (5,0).

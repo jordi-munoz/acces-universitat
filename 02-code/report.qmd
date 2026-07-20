@@ -236,21 +236,36 @@ més presentats), no pel de les notes: la millora de l'expedient és massa petit
 compensada per unes proves que no pugen, per moure el llistó per si sola.
 
 L'excedent de demanda que no cap al sistema públic presencial es desplaça, en bona part,
-cap a altres vies (universitats privades i, molt especialment, la UOC), però aquesta és
-una altra història que queda fora de l'abast d'aquest informe.
+cap a altres vies (universitats privades —la UVic-UCC inclosa— i, molt especialment, la
+UOC), però aquesta és una altra història que queda fora de l'abast d'aquest informe.
 
 ## Nota metodològica
 
-- **Abast**: sistema públic de preinscripció de Catalunya (les 7 universitats públiques,
-  la UVic-UCC i els centres adscrits). No s'hi inclouen universitats privades ni la UOC.
+- **Abast**: les **7 universitats públiques** de Catalunya i els seus centres adscrits, dins
+  del sistema de preinscripció. **S'exclou la UVic-UCC**, que participa a la preinscripció
+  però és de titularitat privada (Fundació Universitària Balmes), i tampoc s'hi inclouen la
+  resta d'universitats privades ni la UOC.
+- **Criteri d'exclusió**: es descarten els estudis en què la UVic-UCC és **l'única**
+  universitat. Els graus **compartits amb una universitat pública** (UAB/UVic) es mantenen,
+  perquè els imparteix també una pública i perquè a la pestanya 7.5 els estudis compartits
+  s'agrupen en una sola fila («Agrupació d'universitats») que no es pot desagregar per
+  universitat: mantenir-los és l'únic criteri aplicable a totes les sèries per igual. Són 2
+  estudis, i cap conclusió de l'informe depèn d'aquesta decisió.
 - **Fonts** (pestanyes dels fitxers `Dades_20XX.xlsx` de l'Oficina d'Accés a la Universitat):
-  - *Sol·licitants en 1a preferència* (juny): pestanya **1.1.6**, un valor per any (`r y0d`–`r y1d`).
-  - *Places de preinscripció*: pestanya **1.1.5**, un valor per any (`r y0d`–`r y1d`). No
-    s'ha fet servir la pestanya 4.4 per al total perquè, als fitxers anteriors a 2023,
-    repeteix cada estudi en diversos blocs i en duplica la suma.
+  - *Sol·licitants en 1a preferència* (juny): pestanya **1.1.6**, agregat per any
+    (`r y0d`–`r y1d`). La universitat surt en una columna pròpia, en sigles.
+  - *Places de preinscripció*: pestanya **1.1.5**, agregat per any (`r y0d`–`r y1d`). La
+    universitat no és una columna: és una fila de secció que encapçala els seus estudis, i
+    es propaga cap avall per etiquetar-los. No s'ha fet servir la pestanya 4.4 per al total
+    perquè, als fitxers anteriors a 2023, repeteix cada estudi en diversos blocs i en
+    duplica la suma.
   - *Matrícula de nou accés*: pestanya **7.5**, fila «Total universitats que participen»
-    (`r y0n`–`r y1n`).
-  - *Notes de tall*: pestanya **5.3** (`r y0n`–`r y1n`).
+    **menys la fila de la UVic-UCC** (`r y0n`–`r y1n`). Aquesta pestanya no es pot filtrar
+    estudi per estudi. Compte: la UVic-UCC hi apareix **dues vegades** —una dins del bloc de
+    participants i una altra al bloc de centres que no hi participen— i només la primera
+    entra al total que es resta.
+  - *Notes de tall*: pestanya **5.3** (`r y0n`–`r y1n`), amb el mateix sistema de files de
+    secció per universitat que la 1.1.5.
 - **PAU**: fitxer `01-dades/pau_cat_resultats_2010_2025.csv` (convocatòria ordinària de
   juny, Catalunya). Els cursos s'han datat per l'**any de les proves** —el curs 2024/25
   són les PAU del juny de 2025—, que és l'any que casa amb la preinscripció d'aquell estiu.
