@@ -29,7 +29,10 @@ if (!file.exists(serie_path)) {
 serie   <- readr::read_csv(serie_path, show_col_types = FALSE)
 coh     <- cohort_table(serie)
 s       <- build_all()
-demanda <- s$demanda
+# La projecció s'ajusta només amb la demanda ferma (2020-2025). El punt
+# provisional de 2026 es reserva com a validació fora de mostra (vegeu la secció
+# de la projecció): l'estimació del model per al 2026 no ha de veure'l.
+demanda <- dplyr::filter(s$demanda, !provisional)
 
 y <- yield_batx2(demanda, coh)
 cat("\n--- Yield sol·licitants / batxillerat 2n del curs anterior ---\n")

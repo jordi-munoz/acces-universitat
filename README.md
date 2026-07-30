@@ -7,13 +7,13 @@ dades de preinscripció de l'**Oficina d'Accés a la Universitat** (OAU), 2016�
 
 ## Què hi trobareu
 
-Entre 2020 i 2025 els sol·licitants en 1a preferència van créixer un 12% (de 53.545 a
-59.824) mentre l'oferta de places només ho feia un 2% (de 38.071 a 38.731). La conseqüència
-és que la mediana de la nota de tall ha passat de 6,21 (2016) a 8,41 (2025).
+Entre 2020 i 2025 els sol·licitants en 1a preferència van créixer un 13% (de 55.815 a
+63.038) mentre l'oferta de places només ho feia un 4% (de 40.213 a 41.801). La conseqüència
+és que la mediana de la nota de tall ha passat de 5,92 (2016) a 8,20 (2025).
 
 L'informe posa a prova l'explicació alternativa —que les notes de tall pugin perquè
 l'alumnat arriba amb millors notes— i la descarta: en el mateix període, la nota d'accés
-mitjana de qui es presenta a les PAU només va pujar 0,14 punts, davant dels 2,20 de la
+mitjana de qui es presenta a les PAU només va pujar 0,14 punts, davant dels 2,28 de la
 mediana del tall. El curs 2025, amb el model nou de PAU, la nota d'accés mitjana fins i tot
 va **baixar** mentre la nota de tall **pujava**.
 
@@ -80,6 +80,32 @@ sèrie agregada que se'n deriva sí:
 Alimenta una sèrie independent de l'informe de preinscripció.
 
 [odg]: https://analisi.transparenciacatalunya.cat/
+
+**4. `01-dades/Dossier Preinscripció 2026.pptx`** *(no cal per reproduir)* — dossier de premsa
+del procés de preinscripció 2026 (Departament de Recerca i Universitats, 10/07/2026). **No
+es versiona.** Serveix per afegir el **punt provisional de 2026** a les sèries de
+sol·licitants, places i ràtio mentre no es publica el `Dades_2026.xlsx` definitiu. Els quatre
+totals que en calen (làmines 2–4 per a sol·licitants, 3 per a places) ja estan **transcrits
+com a constants** a `DOSSIER_2026` dins [`02-code/R/build_series.R`](02-code/R/build_series.R),
+de manera que el pipeline **no llegeix el `.pptx`**: no cal tenir-lo per executar l'anàlisi.
+
+> **Per què el 2026 és «provisional» i com s'incorpora.** El dossier és un resum de premsa i
+> els seus totals de 2025 no casen del tot amb els de les pestanyes (l'única cosa que la resta
+> de la sèrie fa servir):
+>
+> - **Places**: dossier 41.866 vs pestanya 1.1.5 41.801 (+0,2%). **No és una diferència
+>   real**: comparant per universitat, 5 de 8 quadren a la plaça exacta; el desajust és només
+>   com es reparteixen els graus compartits (p. ex. URV/UOC) i els centres mixtos.
+> - **Sol·licitants**: dossier 62.238 vs pestanya 1.1.6 63.038 (−1,3%). És una diferència de
+>   **moment de tall**, no d'abast: la 1.1.6 és el recompte «al tancament» (definitiu) i el
+>   dossier n'és una instantània anterior; el recompte final surt ~1,3% per damunt.
+>
+> Per no introduir un salt artificial al 2025→2026, el punt de 2026 **no es copia tal qual**:
+> s'**enllaça** la variació interanual del dossier (−4,2% en sol·licitants, places planes)
+> sobre el nivell «al tancament» de 2025 de la sèrie pròpia. Així el 2026 estima el que dirà
+> el fitxer definitiu (sol·licitants ≈ 60.420) en comptes de barrejar dues bases. Es marca
+> com a `provisional`, es dibuixa a part (punt buit / barra clara) i **no entra en cap altre
+> càlcul** (ni a la projecció de la demanda, que s'ajusta només amb 2020–2025).
 
 ### Alumnes matriculats per ensenyament i nivell
 
@@ -194,12 +220,8 @@ també la cadena de primària i ESO. Els dos supòsits que més hi pesen:
 
 ## Notes metodològiques
 
-- **Abast**: les 7 universitats públiques catalanes i els seus centres adscrits. **S'exclou
-  la UVic-UCC**, que participa a la preinscripció però és de titularitat privada, i tampoc
-  s'hi inclouen la resta d'universitats privades ni la UOC. L'exclusió afecta els estudis on
-  la UVic-UCC és l'única universitat; els graus compartits amb una pública (UAB/UVic) es
-  mantenen. Les dades d'origen sí que inclouen la UVic-UCC: el filtre s'aplica en construir
-  les sèries (`is_uvic_only()` a [`02-code/R/build_series.R`](02-code/R/build_series.R)).
+- **Abast**: les 7 universitats públiques catalanes, la UVic-UCC i els centres adscrits. No
+  s'hi inclouen les universitats privades ni la UOC.
 - Les **notes de tall** es resumeixen amb la mediana i el rang interquartílic per no
   distorsionar-se amb els canvis de composició de l'oferta. Els valors inferiors a 5,0
   d'alguns anys inicials són anòmals respecte a l'escala 5–14 i es tracten com a terra (5,0).

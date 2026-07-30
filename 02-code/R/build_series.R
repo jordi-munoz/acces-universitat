@@ -63,11 +63,40 @@ CUTOFF_FLOOR <- 5.0
 # Tots són > CUTOFF_FLOOR, així que el terra de 5,0 no els afecta.
 CUTOFF_THRESHOLDS <- c(6, 7, 8, 9, 10, 11, 12)
 
+# Dades provisionals de 2026 del "Dossier Preinscripció 2026" (Departament de
+# Recerca i Universitats, 10/07/2026), única font disponible fins que es publiqui
+# Dades_2026.xlsx. El dossier és un resum de premsa i, per al 2025, els seus
+# totals no coincideixen exactament amb els de les pestanyes:
+#   - places: dossier 41.866 vs 1.1.5 41.801 (+0,2%). NO és una diferència real:
+#     comparant per universitat, 5 de 8 quadren a la plaça exacta; el desajust és
+#     només com es reparteixen els graus compartits i els centres mixtos.
+#   - sol·licitants: dossier 62.238 vs 1.1.6 63.038 (-1,3%). És una diferència de
+#     moment de tall, no d'abast: la pestanya 1.1.6 és el recompte "al tancament"
+#     (definitiu) i el dossier n'és una instantània anterior. El recompte final
+#     surt ~1,3% per damunt del dossier.
+# Per això el punt de 2026 NO es copia tal qual: s'obté encadenant la variació
+# interanual del dossier (-4,2%) sobre el nivell "al tancament" de 2025 de la
+# sèrie pròpia. Així el 2026 estima el que dirà el Dades_2026.xlsx definitiu
+# (~60.420) i s'evita un salt artificial. Es marca com a `provisional`.
+# Vegeu el README per al detall.
+DOSSIER_2026 <- list(
+  sol_2025 = 62238, sol_2026 = 59653,   # estudiants preinscrits (dossier, làmines 2 i 4)
+  plc_2025 = 41866, plc_2026 = 41872    # oferta de places (dossier, làmina 3)
+)
+
+# Afegeix el punt provisional de 2026 a una sèrie anual, encadenant la variació
+# del dossier sobre el valor de `base_year`. `col` és la columna de nivell.
+chain_2026 <- function(df, col, r_2026, r_2025, base_year = 2025L) {
+  base <- df[[col]][df$year == base_year]
+  nou  <- tibble(year = 2026L, !!col := round(base * r_2026 / r_2025), provisional = TRUE)
+  bind_rows(mutate(df, provisional = FALSE), nou)
+}
+
 build_all <- function(data_dir = find_data_dir()) {
   files  <- sort(list.files(data_dir, pattern = "^Dades_20\\d\\d\\.xlsx$", full.names = TRUE))
   latest <- files[which.max(year_from_file(files))]
 
-  # oferta i demanda (un punt per fitxer)
+  # oferta i demanda (un punt per fitxer), 2020-2025 de les pestanyes...
   oferta <- map_dfr(files, read_places) |>
     group_by(year) |>
     summarise(places = sum(places), n_estudis = n(), .groups = "drop")
@@ -76,7 +105,12 @@ build_all <- function(data_dir = find_data_dir()) {
     group_by(year) |>
     summarise(solicitants = sum(solicitants), .groups = "drop")
 
-  pressio <- inner_join(select(oferta, year, places), demanda, by = "year") |>
+  # ...i el punt provisional de 2026, encadenat del dossier (vegeu DOSSIER_2026).
+  oferta  <- chain_2026(oferta,  "places",      DOSSIER_2026$plc_2026, DOSSIER_2026$plc_2025)
+  demanda <- chain_2026(demanda, "solicitants", DOSSIER_2026$sol_2026, DOSSIER_2026$sol_2025)
+
+  pressio <- inner_join(select(oferta, year, places),
+                        select(demanda, year, solicitants, provisional), by = "year") |>
     mutate(ratio = solicitants / places)
 
   # matrícula participants (sèrie completa del fitxer més recent)

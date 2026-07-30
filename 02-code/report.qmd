@@ -31,12 +31,18 @@ dec <- function(x, d = 2) formatC(x, big.mark = ".", decimal.mark = ",", digits 
 pct <- function(x, d = 0) paste0(dec(x, d), "%")
 getv <- function(df, yr, col) df[[col]][df$year == yr]
 
-y0d <- min(s$demanda$year); y1d <- max(s$demanda$year)   # finestra demanda/oferta
+y0d <- min(s$demanda$year)
+y1d <- max(s$demanda$year[!s$demanda$provisional])       # últim any FERM (2025)
+yp  <- max(s$demanda$year)                                # 2026, provisional (dossier)
 y0n <- min(s$notes$year);   y1n <- max(s$notes$year)     # finestra notes/matrícula
 
 sol0 <- getv(s$demanda, y0d, "solicitants"); sol1 <- getv(s$demanda, y1d, "solicitants")
 pla0 <- getv(s$oferta,  y0d, "places");      pla1 <- getv(s$oferta,  y1d, "places")
 rat0 <- getv(s$pressio, y0d, "ratio");       rat1 <- getv(s$pressio, y1d, "ratio")
+
+# punt provisional de 2026 (dossier, enllaçat sobre 2025); no entra als càlculs ferms
+sol_p <- getv(s$demanda, yp, "solicitants"); pla_p <- getv(s$oferta, yp, "places")
+rat_p <- getv(s$pressio, yp, "ratio");       g_sol_p <- 100 * (sol_p / sol1 - 1)
 med0 <- getv(s$notes,   y0n, "mediana");     med1 <- getv(s$notes,   y1n, "mediana")
 inf0 <- getv(s$notes,   y0n, "n_infrademandats"); inf1 <- getv(s$notes, y1n, "n_infrademandats")
 
@@ -103,6 +109,14 @@ forma sostinguda. En canvi, la línia de **places** (blau fosc) és gairebé pla
 clausus*, el nombre de matriculats està limitat per la capacitat, no per la demanda. Per
 això el senyal de creixement es veu, sobretot, en els **sol·licitants**.
 
+El punt buit de **`r yp`** és el primer descens després del màxim: amb dades encara
+provisionals, els sol·licitants baixen un **`r pct(abs(g_sol_p))`** (fins a uns
+`r mil(sol_p)`), mentre l'oferta segueix plana. És un sol any i cal prendre'l amb cautela
+—surt del *Dossier de preinscripció* de juliol de `r yp`, no de les pestanyes que alimenten
+la resta de la sèrie, i s'ha enllaçat sobre el nivell ferm de `r y1d` (vegeu la nota
+metodològica)—, però és coherent amb el que fa preveure la demografia escolar: les cohorts
+que arriben a la universitat han deixat de créixer.
+
 ## 2. Les places es mantenen estables
 
 ```{r fig-pressio}
@@ -114,6 +128,11 @@ sol·licitants hi ha per cada plaça— augmenta. L'any `r y0d` hi havia `r dec(
 sol·licitants per plaça; el `r y1d`, ja en són `r dec(rat1)`. No és que s'hagin retallat
 places (de fet han crescut lleugerament, sovint amb graus nous), sinó que **l'oferta no
 ha seguit el ritme de la demanda**.
+
+La barra clara de `r yp` (provisional) mostra el primer respir després de sis anys de
+pujada: la ràtio afluixa fins a `r dec(rat_p)` sol·licitants per plaça. Encara queda molt
+per damunt del `r dec(rat0)` de `r y0d`, però marca un punt d'inflexió que caldrà confirmar
+amb les dades definitives.
 
 ## 3. Les notes de tall pugen
 
@@ -251,6 +270,19 @@ una altra història que queda fora de l'abast d'aquest informe.
   - *Matrícula de nou accés*: pestanya **7.5**, fila «Total universitats que participen»
     (`r y0n`–`r y1n`).
   - *Notes de tall*: pestanya **5.3** (`r y0n`–`r y1n`).
+- **Punt provisional de `r yp`** (sol·licitants, places i ràtio): el fitxer `Dades_`r yp`.xlsx`
+  encara no s'ha publicat, així que el `r yp` surt del **Dossier de preinscripció `r yp`**
+  (Departament de Recerca i Universitats, juliol de `r yp`), l'únic disponible. Els seus
+  totals no casen del tot amb els de les pestanyes: per a `r y1d` dóna 62.238 sol·licitants
+  i 41.866 places, davant dels `r mil(sol1)` i `r mil(pla1)` de 1.1.6/1.1.5. En el cas de
+  les **places** no és cap diferència real (5 de 8 universitats quadren a la plaça exacta;
+  el desajust és només com es reparteixen els graus compartits). En el dels **sol·licitants**
+  (−1,3%) és una qüestió de **moment de tall**: la pestanya 1.1.6 és el recompte «al
+  tancament» i el dossier n'és una instantània anterior. Per no crear un salt artificial, el
+  punt de `r yp` **no es copia tal qual** sinó que **s'enllaça** la variació interanual del
+  dossier (−`r pct(abs(g_sol_p))`) sobre el nivell ferm de `r y1d`; així estima el que dirà
+  el fitxer definitiu. Als gràfics es marca a part (punt buit / barra clara) i **no entra en
+  cap altre càlcul** de l'informe.
 - **PAU**: fitxer `01-dades/pau_cat_resultats_2010_2025.csv` (convocatòria ordinària de
   juny, Catalunya). Els cursos s'han datat per l'**any de les proves** —el curs 2024/25
   són les PAU del juny de 2025—, que és l'any que casa amb la preinscripció d'aquell estiu.
@@ -278,7 +310,8 @@ tidy_series(s) |>
   pivot_wider(names_from = metric, values_from = value) |>
   arrange(year) |>
   knitr::kable(
-    caption = "Sèries resultants (buits = fora de la finestra de la sèrie).",
+    caption = paste0("Sèries resultants (buits = fora de la finestra de la sèrie). El ", yp,
+                     " de sol·licitants, places i ràtio és provisional (dossier, enllaçat)."),
     format.args = list(big.mark = ".", decimal.mark = ",")
   )
 ```

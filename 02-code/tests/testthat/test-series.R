@@ -22,11 +22,26 @@ s <- build_all()
 
 get_val <- function(df, yr, col) df[[col]][df$year == yr]
 
-test_that("oferta de places: sèrie 2020-2025 i valors àncora", {
-  expect_setequal(s$oferta$year, 2020:2025)
+test_that("oferta de places: sèrie 2020-2025 (ferma) + 2026 provisional", {
+  expect_setequal(s$oferta$year, 2020:2026)
   expect_equal(get_val(s$oferta, 2020, "places"), 40213)
   expect_equal(get_val(s$oferta, 2025, "places"), 41801)
   expect_equal(get_val(s$oferta, 2025, "n_estudis"), 555)
+  # el 2026 és l'únic any marcat com a provisional
+  expect_setequal(s$oferta$year[s$oferta$provisional], 2026)
+  expect_false(any(s$oferta$provisional[s$oferta$year <= 2025]))
+})
+
+test_that("2026 provisional: enllaçat del dossier sobre el nivell ferm de 2025", {
+  # el punt de 2026 no es copia del dossier: s'encadena la seva variació
+  # interanual sobre el valor "al tancament" de 2025 de la sèrie pròpia.
+  expect_equal(get_val(s$demanda, 2026, "solicitants"),
+               round(63038 * DOSSIER_2026$sol_2026 / DOSSIER_2026$sol_2025))
+  expect_equal(get_val(s$oferta, 2026, "places"),
+               round(41801 * DOSSIER_2026$plc_2026 / DOSSIER_2026$plc_2025))
+  expect_true(get_val(s$demanda, 2026, "provisional"))
+  # la ràtio de 2026 hereta la marca de provisional
+  expect_true(get_val(s$pressio, 2026, "provisional"))
 })
 
 test_that("demanda: sol·licitants 1a preferència, valors àncora", {

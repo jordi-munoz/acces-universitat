@@ -40,39 +40,47 @@ fmt_mil <- scales::label_number(big.mark = ".", decimal.mark = ",")
 # 1. Tisora demanda-oferta ---------------------------------------------------
 plot_tisora <- function(s) {
   df <- bind_rows(
-    transmute(s$demanda,   year, serie = "Sol·licitants (1a preferència)", value = solicitants),
-    transmute(s$oferta,    year, serie = "Places ofertes",                  value = places),
-    transmute(s$matricula, year, serie = "Matrícula de nou accés",          value = matricula)
+    transmute(s$demanda,   year, serie = "Sol·licitants (1a preferència)", value = solicitants, prov = provisional),
+    transmute(s$oferta,    year, serie = "Places ofertes",                  value = places,      prov = provisional),
+    transmute(s$matricula, year, serie = "Matrícula de nou accés",          value = matricula,   prov = FALSE)
   ) |>
-    filter(year >= min(s$demanda$year))  # finestra comuna 2020-2025
+    filter(year >= min(s$demanda$year))  # finestra comuna 2020-2025(+2026 prov.)
 
-  ggplot(df, aes(year, value, color = serie)) +
-    geom_line(linewidth = 1.1) +
-    geom_point(size = 2.2) +
-    scale_color_manual(values = c(
-      "Sol·licitants (1a preferència)" = COL_DEMANDA,
-      "Places ofertes"                 = COL_OFERTA,
-      "Matrícula de nou accés"         = COL_MATRICULA
-    )) +
+  cols <- c("Sol·licitants (1a preferència)" = COL_DEMANDA,
+            "Places ofertes"                 = COL_OFERTA,
+            "Matrícula de nou accés"         = COL_MATRICULA)
+  firm <- filter(df, !prov)
+  # tram provisional: de l'últim any ferm al 2026, només per a les sèries que hi arriben
+  bridge <- df |> group_by(serie) |> filter(any(prov)) |>
+    filter(year >= max(year[!prov])) |> ungroup()
+
+  ggplot(mapping = aes(year, value, color = serie)) +
+    geom_line(data = firm, linewidth = 1.1) +
+    geom_line(data = bridge, linewidth = 1.1, linetype = "22") +
+    geom_point(data = firm, size = 2.2) +
+    geom_point(data = filter(df, prov), size = 2.4, shape = 21, fill = "white", stroke = 1.1) +
+    scale_color_manual(values = cols) +
     scale_x_continuous(breaks = unique(df$year)) +
     scale_y_continuous(labels = fmt_mil, limits = c(0, NA)) +
     labs(
       title = "La demanda creix; l'oferta de places, gairebé congelada",
-      subtitle = "Universitats públiques de Catalunya",
+      subtitle = "Sistema públic de preinscripció de Catalunya",
       x = NULL, y = "Nombre d'estudiants",
       caption = paste0("Font: Oficina d'Accés a la Universitat. Sol·licitants i places: pestanyes 1.1.6 i 1.1.5.\n",
-                       "Només universitats públiques: s'exclou la UVic-UCC.")
+                       "2026 (punt buit): provisional, del Dossier de preinscripció; enllaçat sobre el nivell de 2025.")
     ) +
     tema_divulgatiu()
 }
 
 # 2. Pressió d'accés (ràtio sol·licitants/plaça) -----------------------------
 plot_pressio <- function(s) {
-  df <- s$pressio
+  df <- dplyr::mutate(s$pressio,
+                      etiqueta = paste0(scales::number(ratio, accuracy = 0.01, decimal.mark = ","),
+                                        ifelse(provisional, "*", "")))
   ggplot(df, aes(year, ratio)) +
-    geom_col(fill = COL_ACCENT, width = 0.65) +
-    geom_text(aes(label = scales::number(ratio, accuracy = 0.01, decimal.mark = ",")),
-              vjust = -0.5, size = 3.4, color = "grey20") +
+    geom_col(aes(alpha = provisional), fill = COL_ACCENT, width = 0.65) +
+    geom_text(aes(label = etiqueta), vjust = -0.5, size = 3.4, color = "grey20") +
+    scale_alpha_manual(values = c(`FALSE` = 1, `TRUE` = 0.5), guide = "none") +
     scale_x_continuous(breaks = df$year) +
     scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
     labs(
@@ -80,7 +88,7 @@ plot_pressio <- function(s) {
       subtitle = "Ràtio de sol·licitants en 1a preferència per plaça oferta",
       x = NULL, y = "Sol·licitants / plaça",
       caption = paste0("Font: Oficina d'Accés a la Universitat. Elaboració pròpia (1.1.6 / 1.1.5).\n",
-                       "Només universitats públiques: s'exclou la UVic-UCC.")
+                       "* 2026: provisional, del Dossier de preinscripció; enllaçat sobre el nivell de 2025.")
     ) +
     tema_divulgatiu()
 }
@@ -98,8 +106,7 @@ plot_notes <- function(s) {
       title = "Les notes de tall pugen",
       subtitle = "Mediana de la nota de tall (banda: 1r-3r quartil). Escala 5-14",
       x = NULL, y = "Nota de tall",
-      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3). Valors < 5 tractats com a terra 5,0.\n",
-                       "Només universitats públiques: s'exclou la UVic-UCC.")
+      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3). Valors < 5 tractats com a terra 5,0."
     ) +
     tema_divulgatiu()
 }
@@ -138,8 +145,7 @@ plot_llindars <- function(s, llindars = LLINDARS_PLOT) {
       title = "La pujada arrossega tota la distribució, no només els graus d'elit",
       subtitle = "% d'estudis amb la nota de tall igual o superior a cada llindar (escala 5-14)",
       x = NULL, y = "% d'estudis",
-      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3). Elaboració pròpia.\n",
-                       "Només universitats públiques: s'exclou la UVic-UCC.")
+      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3). Elaboració pròpia."
     ) +
     tema_divulgatiu()
 }
@@ -158,8 +164,7 @@ plot_infrademanda <- function(s) {
       title = "Cada cop menys estudis queden per sota de la competència",
       subtitle = "% d'estudis amb nota de tall al mínim (5,0), és a dir, sense excés de demanda",
       x = NULL, y = "% d'estudis",
-      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3).\n",
-                       "Només universitats públiques: s'exclou la UVic-UCC.")
+      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3)."
     ) +
     tema_divulgatiu()
 }
@@ -249,8 +254,7 @@ plot_pau_vs_tall <- function(s) {
       subtitle = paste0("Canvi acumulat en punts respecte a ", y0,
                         " (dues escales diferents, mateixa base)"),
       x = NULL, y = paste0("Punts de canvi des de ", y0),
-      caption = paste0("Font: Oficina d'Accés a la Universitat (5.3) i resultats de les PAU. Elaboració pròpia.\n",
-                       "Notes de tall: només universitats públiques (s'exclou la UVic-UCC).")
+      caption = "Font: Oficina d'Accés a la Universitat (5.3) i resultats de les PAU. Elaboració pròpia."
     ) +
     tema_divulgatiu()
 }
@@ -297,7 +301,7 @@ plot_projeccio <- function(taula) {
       caption = paste0(
         "Font: Oficina d'Accés a la Universitat i dades obertes del Departament d'Educació. Elaboració pròpia.\n",
         "Banda: recorregut històric de la ràtio sol·licitants / batxillerat 2n (2020-2025), no és un interval de confiança.\n",
-        "Només universitats públiques: s'exclou la UVic-UCC.")
+        "Abast: sistema públic de preinscripció de Catalunya (universitats públiques i UVic-UCC).")
     ) +
     tema_divulgatiu() +
     theme(legend.position = "top")

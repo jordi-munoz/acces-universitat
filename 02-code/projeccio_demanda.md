@@ -37,24 +37,24 @@ s'hi manté un parell d'anys i, a partir del 2034, cau cap a un terreny que no s
 
 | Any | | Sol·licitants | vs 2020 | vs 2025 | Índex (2020=100) | Recorregut |
 |---|---|---:|---:|---:|---:|---:|
-| 2020 | observat | 53.545 | — | −10,5% | 100,0 | |
-| 2021 | observat | 55.221 | +3,1% | −7,7% | 103,1 | |
-| 2022 | observat | 56.431 | +5,4% | −5,7% | 105,4 | |
-| 2023 | observat | 55.341 | +3,4% | −7,5% | 103,4 | |
-| 2024 | observat | 55.981 | +4,5% | −6,4% | 104,5 | |
-| **2025** | **observat — màxim** | **59.824** | **+11,7%** | — | **111,7** | |
-| 2026 | projecció ◆ | 58.031 | +8,4% | −3,0% | 108,4 | 56.338–60.176 |
-| 2027 | projecció | 56.470 | +5,5% | −5,6% | 105,5 | 54.822–58.557 |
-| 2028 | projecció | 56.359 | +5,3% | −5,8% | 105,3 | 54.714–58.442 |
-| 2029 | projecció | 55.521 | +3,7% | −7,2% | 103,7 | 53.901–57.573 |
-| 2030 | projecció | 54.967 | +2,7% | −8,1% | 102,7 | 53.363–56.998 |
-| 2031 | projecció | 53.004 | −1,0% | −11,4% | 99,0 | 51.457–54.963 |
-| 2032 | projecció | 53.825 | +0,5% | −10,0% | 100,5 | 52.254–55.814 |
-| 2033 | projecció | 53.569 | +0,0% | −10,5% | 100,0 | 52.006–55.549 |
-| 2034 | projecció | 52.577 | −1,8% | −12,1% | 98,2 | 51.043–54.520 |
-| 2035 | projecció | 50.961 | −4,8% | −14,8% | 95,2 | 49.474–52.844 |
-| 2036 | projecció | 48.607 | −9,2% | −18,8% | 90,8 | 47.189–50.404 |
-| 2037 | projecció | 46.404 | −13,3% | **−22,4%** | 86,7 | 45.050–48.119 |
+| 2020 | observat | 55.815 | — | −11,5% | 100,0 | |
+| 2021 | observat | 57.411 | +2,9% | −8,9% | 102,9 | |
+| 2022 | observat | 59.038 | +5,8% | −6,3% | 105,8 | |
+| 2023 | observat | 58.023 | +4,0% | −8,0% | 104,0 | |
+| 2024 | observat | 58.975 | +5,7% | −6,4% | 105,7 | |
+| **2025** | **observat — màxim** | **63.038** | **+12,9%** | — | **112,9** | |
+| 2026 | projecció ◆ | 60.778 | +8,9% | −3,6% | 108,9 | 59.068–63.409 |
+| 2027 | projecció | 59.143 | +6,0% | −6,2% | 106,0 | 57.479–61.703 |
+| 2028 | projecció | 59.026 | +5,8% | −6,4% | 105,8 | 57.366–61.581 |
+| 2029 | projecció | 58.149 | +4,2% | −7,8% | 104,2 | 56.513–60.667 |
+| 2030 | projecció | 57.568 | +3,1% | −8,7% | 103,1 | 55.949–60.060 |
+| 2031 | projecció | 55.512 | −0,5% | −11,9% | 99,5 | 53.951–57.916 |
+| 2032 | projecció | 56.372 | +1,0% | −10,6% | 101,0 | 54.787–58.813 |
+| 2033 | projecció | 56.105 | +0,5% | −11,0% | 100,5 | 54.526–58.534 |
+| 2034 | projecció | 55.065 | −1,3% | −12,6% | 98,7 | 53.516–57.449 |
+| 2035 | projecció | 53.373 | −4,4% | −15,3% | 95,6 | 51.871–55.683 |
+| 2036 | projecció | 50.908 | −8,8% | −19,2% | 91,2 | 49.476–53.112 |
+| 2037 | projecció | 48.600 | −12,9% | **−22,9%** | 87,1 | 47.233–50.704 |
 
 ◆ El 2026 surt d'alumnes que ja són a batxillerat 2n: no hi intervé cap ràtio de progressió.
 El recorregut és el rang històric observat de la ràtio de conversió, **no** un interval de
@@ -75,10 +75,10 @@ amaga:
 ### Això obliga a rellegir tot el que hem vist
 
 Hi ha un càlcul que canvia el sentit dels apartats anteriors. Entre el 2020 i el 2025 els
-sol·licitants van créixer un **11,7%**; la cohort de 4t d'ESO de la qual surten, tres anys
+sol·licitants van créixer un **12,9%**; la cohort de 4t d'ESO de la qual surten, tres anys
 abans, havia crescut un **18,6%**. La demanda, doncs, **va créixer menys que la població que
 la genera**: la proporció d'una cohort que acaba demanant plaça a la pública va caure prop
-d'un 6%.
+d'un 5%.
 
 Ara bé, això no vol dir que estudiar hagi perdut atractiu, i val la pena separar les dues
 coses perquè apunten en direccions diferents:
@@ -86,7 +86,7 @@ coses perquè apunten en direccions diferents:
 - **Menys alumnes fan batxillerat.** La ràtio d'ESO 4t a batxillerat 1r va de 0,704 (2015) a
   0,596 (2024): el desviament cap a la FP explica pràcticament tota la caiguda anterior.
 - **Els qui el fan, demanen plaça igual o més.** Entre els qui acaben batxillerat, la
-  proporció que sol·licita plaça va **pujar** un 2,8% en el mateix període.
+  proporció que sol·licita plaça va **pujar** un 3,9% en el mateix període.
 
 La conclusió és que el creixement de la demanda dels apartats 1 i 2 **era demografia**: una
 onada de cohorts grosses travessant el sistema. El canvi de comportament no va ser a la
@@ -125,9 +125,9 @@ nivell actual --(ràtios de progressió)--> batxillerat 2n --(ràtio de conversi
   curs *T−1*. És d'**1,21** de mitjana (recorregut 1,18–1,26). Val més d'1 perquè als
   sol·licitants s'hi sumen les altres vies d'accés —sobretot CFGS— i qui repeteix
   convocatòria.
-- **Abast**: universitats públiques, amb el mateix criteri que la resta de l'informe
-  (s'exclou la UVic-UCC). Els alumnes surten de primària, ESO i batxillerat ordinaris;
-  l'educació d'adults i l'especial en queden fora.
+- **Abast**: el mateix sistema públic de preinscripció que la resta de l'informe (les 7
+  universitats públiques i la UVic-UCC). Els alumnes surten de primària, ESO i batxillerat
+  ordinaris; l'educació d'adults i l'especial en queden fora.
 
 **Per què es projecta passant pel batxillerat.** Es van provar dos models. El de batxillerat
 2n té una ràtio de conversió plana (pendent no significatiu, p = 0,83). L'alternativa
@@ -136,6 +136,13 @@ la seva ràtio absorbeix silenciosament la caiguda del pes del batxillerat. En p
 *walk-forward*, estimant la ràtio només amb anys anteriors al que es prediu, l'error mitjà
 és del **3,2%** amb el model de batxillerat i del **4,6%** amb el d'ESO 4t. La projecció de
 cohorts, tota sola, encerta entre **−1,7% i +2,7%** a horitzons de 3 a 8 anys.
+
+**Una primera confirmació fora de mostra.** El model, ajustat només amb dades fins al 2025,
+projectava **60.778** sol·licitants per al 2026. El primer avançament d'aquell any —el
+*Dossier de preinscripció 2026*, enllaçat sobre el nivell de 2025— en dóna **≈ 60.420**: una
+diferència del **0,6%**. Un sol punt no valida un model, però és exactament el tipus de senyal
+que caldria esperar si la lectura de fons —que la demanda ha tocat sostre per demografia— és
+correcta.
 
 **On és la incertesa.** No en la demografia. Els alumnes que sostenen la demanda fins al
 2028 ja estan comptats al curs 2025/2026. El que s'ha de suposar és la part del trajecte que
@@ -149,10 +156,10 @@ els queda, i hi pesen dos supòsits:
   projecció, però l'efecte net sobre el total de sol·licitants és més esmorteït.
 - **Les cohorts guanyen efectius pel camí**: una cohort creix prop d'un 13% de 1r de
   primària a 4t d'ESO, cosa que reflecteix sobretot migració neta. La projecció central
-  manté aquest guany. Si s'anul·la del tot, el 2037 no serien 46.404 sol·licitants sinó
-  **40.665: un 32% menys que el 2025** en comptes d'un 22%. La columna
+  manté aquest guany. Si s'anul·la del tot, el 2037 no serien 48.600 sol·licitants sinó
+  **42.589: un 32% menys que el 2025** en comptes d'un 23%. La columna
   `sense_creixement_cohort` de `04-output/projeccio_demanda.csv` en dóna la sèrie sencera.
 
-En conjunt, doncs, el 22% s'ha de llegir com una estimació **central i més aviat prudent**:
+En conjunt, doncs, el 23% s'ha de llegir com una estimació **central i més aviat prudent**:
 depèn que la immigració segueixi compensant part del buit demogràfic. Si no ho fa, la
 caiguda és més fonda.
