@@ -96,17 +96,23 @@ plot_pressio <- function(s) {
 # 3. Notes de tall: centre que puja + infrademanda que baixa -----------------
 plot_notes <- function(s) {
   df <- s$notes
+  firm <- filter(df, !provisional)
+  bridge <- filter(df, year >= max(df$year[!df$provisional]))  # 2025 + 2026 prov.
   ggplot(df, aes(year)) +
-    geom_ribbon(aes(ymin = q25, ymax = q75), fill = COL_NOTA, alpha = 0.15) +
-    geom_line(aes(y = mediana), color = COL_NOTA, linewidth = 1.1) +
-    geom_point(aes(y = mediana), color = COL_NOTA, size = 2.2) +
+    geom_ribbon(data = firm, aes(ymin = q25, ymax = q75), fill = COL_NOTA, alpha = 0.15) +
+    geom_line(data = firm, aes(y = mediana), color = COL_NOTA, linewidth = 1.1) +
+    geom_line(data = bridge, aes(y = mediana), color = COL_NOTA, linewidth = 1.1, linetype = "22") +
+    geom_point(data = firm, aes(y = mediana), color = COL_NOTA, size = 2.2) +
+    geom_point(data = filter(df, provisional), aes(y = mediana), color = COL_NOTA,
+               size = 2.4, shape = 21, fill = "white", stroke = 1.1) +
     scale_x_continuous(breaks = df$year) +
     scale_y_continuous(limits = c(5, NA)) +
     labs(
       title = "Les notes de tall pugen",
       subtitle = "Mediana de la nota de tall (banda: 1r-3r quartil). Escala 5-14",
       x = NULL, y = "Nota de tall",
-      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3). Valors < 5 tractats com a terra 5,0."
+      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3). Valors < 5 tractats com a terra 5,0.\n",
+                       "2026 (punt buit): provisional, 1a assignació (mateixa base que la sèrie).")
     ) +
     tema_divulgatiu()
 }
@@ -127,10 +133,15 @@ plot_llindars <- function(s, llindars = LLINDARS_PLOT) {
   cols <- setNames(RAMPA_LLINDAR[as.character(sort(llindars))],
                    paste0("≥ ", sort(llindars)))
   y1 <- max(df$year)
+  firm <- filter(df, !provisional)
+  bridge <- filter(df, year >= max(df$year[!df$provisional]))  # 2025 + 2026 prov.
 
   ggplot(df, aes(year, pct, color = serie)) +
-    geom_line(linewidth = 1.1) +
-    geom_point(size = 2) +
+    geom_line(data = firm, linewidth = 1.1) +
+    geom_line(data = bridge, linewidth = 1.1, linetype = "22") +
+    geom_point(data = firm, size = 2) +
+    geom_point(data = filter(df, provisional), size = 2.2, shape = 21,
+               fill = "white", stroke = 1.1) +
     geom_text(
       data = filter(df, year == y1),
       aes(label = paste0("≥ ", llindar)),
@@ -145,18 +156,21 @@ plot_llindars <- function(s, llindars = LLINDARS_PLOT) {
       title = "La pujada arrossega tota la distribució, no només els graus d'elit",
       subtitle = "% d'estudis amb la nota de tall igual o superior a cada llindar (escala 5-14)",
       x = NULL, y = "% d'estudis",
-      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3). Elaboració pròpia."
+      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3). Elaboració pròpia.\n",
+                       "2026 (punt buit): provisional, 1a assignació.")
     ) +
     tema_divulgatiu()
 }
 
 # 3b. Estudis infrademandats (nota de tall al terra) -------------------------
 plot_infrademanda <- function(s) {
-  df <- s$notes
+  df <- dplyr::mutate(s$notes,
+    etiqueta = paste0(scales::number(pct_infrademandats, accuracy = 1, suffix = "%"),
+                      ifelse(provisional, "*", "")))
   ggplot(df, aes(year, pct_infrademandats)) +
-    geom_col(fill = COL_OFERTA, width = 0.65) +
-    geom_text(aes(label = scales::number(pct_infrademandats, accuracy = 1, suffix = "%")),
-              vjust = -0.5, size = 3.2, color = "grey20") +
+    geom_col(aes(alpha = provisional), fill = COL_OFERTA, width = 0.65) +
+    geom_text(aes(label = etiqueta), vjust = -0.5, size = 3.2, color = "grey20") +
+    scale_alpha_manual(values = c(`FALSE` = 1, `TRUE` = 0.5), guide = "none") +
     scale_x_continuous(breaks = df$year) +
     scale_y_continuous(labels = scales::label_percent(scale = 1),
                        expand = expansion(mult = c(0, 0.12))) +
@@ -164,7 +178,8 @@ plot_infrademanda <- function(s) {
       title = "Cada cop menys estudis queden per sota de la competència",
       subtitle = "% d'estudis amb nota de tall al mínim (5,0), és a dir, sense excés de demanda",
       x = NULL, y = "% d'estudis",
-      caption = "Font: Oficina d'Accés a la Universitat (pestanya 5.3)."
+      caption = paste0("Font: Oficina d'Accés a la Universitat (pestanya 5.3).\n",
+                       "* 2026: provisional, 1a assignació.")
     ) +
     tema_divulgatiu()
 }
@@ -220,8 +235,9 @@ plot_pau_notes <- function(s) {
 # Dues escales diferents (tall 5-14, accés 0-10): s'indexen a punts de canvi
 # respecte a l'any base per poder-les llegir en un sol eix.
 plot_pau_vs_tall <- function(s) {
+  # comparació analítica ferma: s'exclou el 2026 provisional de les notes de tall
   y0 <- max(min(s$notes$year), min(s$pau$year))
-  y1 <- min(max(s$notes$year), max(s$pau$year))
+  y1 <- min(max(s$notes$year[!s$notes$provisional]), max(s$pau$year))
   base <- function(d, col) d[[col]][d$year == y0]
 
   df <- bind_rows(

@@ -8,6 +8,10 @@
 # l'apartat de les PAU (no es pot descarregar de cap altre lloc).
 !01-dades/pau_cat_resultats_2010_2025.csv
 
+# Excepció: notes de tall de 2026 (1a assignació) extretes del PDF de l'OAU amb
+# 02-code/extract_notes_tall_pdf.py. Es versiona el CSV petit, no el PDF.
+!01-dades/notes_tall_1a_2026.csv
+
 # Notes metodològiques oficials de l'OAU: també són fitxers de tercers.
 # El README i 03-documentacio/ n'enllacen l'original any per any.
 03-documentacio/Nota_metodologica_*.pdf

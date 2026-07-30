@@ -107,6 +107,23 @@ de manera que el pipeline **no llegeix el `.pptx`**: no cal tenir-lo per executa
 > com a `provisional`, es dibuixa a part (punt buit / barra clara) i **no entra en cap altre
 > càlcul** (ni a la projecció de la demanda, que s'ajusta només amb 2020–2025).
 
+**5. [`01-dades/notes_tall_1a_2026.csv`](01-dades/notes_tall_1a_2026.csv)** *(ja inclòs)* —
+notes de tall de la **1a assignació** de 2026 (558 estudis), extretes del PDF de l'OAU
+`Notes tall 1a assignacio ... JUNY 2026.pdf` amb
+[`02-code/extract_notes_tall_pdf.py`](02-code/extract_notes_tall_pdf.py) (Python + pdfplumber,
+per coordenades). El PDF **no es versiona**; el CSV resultant, petit, **sí** (excepció al
+`.gitignore`).
+
+> **Per què el 2026 de notes de tall és directe i no enllaçat.** A diferència dels
+> sol·licitants, aquí **no hi ha canvi de base**: la pestanya 5.3 històrica també són notes
+> de **1a assignació** (comprovat —el 2025 hi casa a la mil·lèsima: Medicina Campus Clínic
+> 12,850, no els 12,505 «al tancament»). Per tant aquest punt amplia la sèrie de notes
+> **directament**, sense enllaçar. Es marca com a `provisional` només perquè encara no és al
+> `Dades_2026.xlsx` definitiu, i es dibuixa a part (punt buit). Validació creuada amb el
+> dossier: 560 centres, 147 al terra (5,0) i mediana a la banda 8–9, tot casa. El 2026
+> mostra un primer **refredament** (mediana 8,20 → 8,16; ≥12: 5,6% → 3,9%), coherent amb la
+> caiguda de la demanda.
+
 ### Alumnes matriculats per ensenyament i nivell
 
 `build_matriculats.R` redueix el fitxer d'origen —una fila per centre × ensenyament ×

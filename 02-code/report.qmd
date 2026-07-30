@@ -34,17 +34,21 @@ getv <- function(df, yr, col) df[[col]][df$year == yr]
 y0d <- min(s$demanda$year)
 y1d <- max(s$demanda$year[!s$demanda$provisional])       # últim any FERM (2025)
 yp  <- max(s$demanda$year)                                # 2026, provisional (dossier)
-y0n <- min(s$notes$year);   y1n <- max(s$notes$year)     # finestra notes/matrícula
+y0n <- min(s$notes$year)
+y1n <- max(s$notes$year[!s$notes$provisional])           # últim any FERM de notes (2025)
+ypn <- max(s$notes$year)                                  # 2026, provisional (1a assig.)
 
 sol0 <- getv(s$demanda, y0d, "solicitants"); sol1 <- getv(s$demanda, y1d, "solicitants")
 pla0 <- getv(s$oferta,  y0d, "places");      pla1 <- getv(s$oferta,  y1d, "places")
 rat0 <- getv(s$pressio, y0d, "ratio");       rat1 <- getv(s$pressio, y1d, "ratio")
 
-# punt provisional de 2026 (dossier, enllaçat sobre 2025); no entra als càlculs ferms
+# punts provisionals de 2026; no entren en cap càlcul ferm de l'informe
 sol_p <- getv(s$demanda, yp, "solicitants"); pla_p <- getv(s$oferta, yp, "places")
 rat_p <- getv(s$pressio, yp, "ratio");       g_sol_p <- 100 * (sol_p / sol1 - 1)
 med0 <- getv(s$notes,   y0n, "mediana");     med1 <- getv(s$notes,   y1n, "mediana")
 inf0 <- getv(s$notes,   y0n, "n_infrademandats"); inf1 <- getv(s$notes, y1n, "n_infrademandats")
+med_p <- getv(s$notes, ypn, "mediana"); inf_p <- getv(s$notes, ypn, "n_infrademandats")
+d_med_p <- med_p - med1                                   # canvi 2025 -> 2026 provisional
 
 g_sol <- 100 * (sol1 / sol0 - 1)
 g_pla <- 100 * (pla1 / pla0 - 1)
@@ -56,8 +60,8 @@ g_mat <- 100 * (mat1 / mat0 - 1)
 getl <- function(t, yr) s$llindars$pct[s$llindars$llindar == t & s$llindars$year == yr]
 n0 <- getv(s$notes, y0n, "n"); n1 <- getv(s$notes, y1n, "n")
 
-# pic de la cua alta (llindar 12)
-l12    <- dplyr::filter(s$llindars, llindar == 12)
+# pic de la cua alta (llindar 12); només anys ferms
+l12    <- dplyr::filter(s$llindars, llindar == 12, !provisional)
 yr_max12 <- l12$year[which.max(l12$pct)]
 pk12     <- max(l12$pct)
 
@@ -144,6 +148,13 @@ La conseqüència directa de tot plegat és que **entrar és més difícil**. La
 nota de tall ha pujat de `r dec(med0)` a `r dec(med1)` punts (escala 5–14). La banda
 ombrejada mostra que la pujada no és d'uns pocs graus estrella, sinó de gairebé tota la
 distribució.
+
+El punt buit de `r ypn` (provisional, de la **1a assignació** —la mateixa base que tota la
+sèrie) apunta un primer refredament coherent amb la caiguda de la demanda: la mediana baixa
+lleugerament (a `r dec(med_p)`) i tornen a créixer els estudis que s'omplen sense competència
+(de `r inf1` a `r inf_p`). El descens es concentra a la part alta —els graus amb nota de tall
+de `r dec(12,0)` o més passen del `r pct(getl(12, y1n))` al `r pct(getl(12, ypn))`—, és a dir,
+just on la competència s'havia enfilat més.
 
 ### Quants estudis queden per damunt de cada llindar
 
@@ -283,6 +294,12 @@ una altra història que queda fora de l'abast d'aquest informe.
   dossier (−`r pct(abs(g_sol_p))`) sobre el nivell ferm de `r y1d`; així estima el que dirà
   el fitxer definitiu. Als gràfics es marca a part (punt buit / barra clara) i **no entra en
   cap altre càlcul** de l'informe.
+- **Notes de tall de `r ypn`** (provisional): surten del PDF de notes de tall de la **1a
+  assignació** (`r ypn`) de l'OAU, extret amb `02-code/extract_notes_tall_pdf.py` cap a
+  `01-dades/notes_tall_1a_`r ypn`.csv` (`r n1` estudis). A diferència dels sol·licitants, aquí
+  **no hi ha canvi de base**: la pestanya 5.3 històrica també són notes de 1a assignació
+  (comprovat, casa a la mil·lèsima amb el `r y1d`), de manera que aquest punt amplia la sèrie
+  directament. Es marca com a provisional només perquè encara no és al fitxer `Dades` definitiu.
 - **PAU**: fitxer `01-dades/pau_cat_resultats_2010_2025.csv` (convocatòria ordinària de
   juny, Catalunya). Els cursos s'han datat per l'**any de les proves** —el curs 2024/25
   són les PAU del juny de 2025—, que és l'any que casa amb la preinscripció d'aquell estiu.
@@ -311,7 +328,8 @@ tidy_series(s) |>
   arrange(year) |>
   knitr::kable(
     caption = paste0("Sèries resultants (buits = fora de la finestra de la sèrie). El ", yp,
-                     " de sol·licitants, places i ràtio és provisional (dossier, enllaçat)."),
+                     " és provisional: sol·licitants/places/ràtio (dossier, enllaçat) i ",
+                     "notes de tall (1a assignació). Les PAU arriben fins al ", yp, " de ple dret."),
     format.args = list(big.mark = ".", decimal.mark = ",")
   )
 ```

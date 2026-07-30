@@ -119,8 +119,13 @@ build_all <- function(data_dir = find_data_dir()) {
     filter(str_detect(universitat, "^Total universitats que participen")) |>
     transmute(year, matricula)
 
-  # notes de tall: resum anual
-  cutoff_raw <- read_cutoff(latest) |>
+  # notes de tall: 2016-2025 de la pestanya 5.3 (fermes) + 2026 de 1a assignació
+  # del PDF de l'OAU (provisional, però sobre la MATEIXA base: també 1a assignació).
+  cutoff_2026 <- read_cutoff_2026(file.path(data_dir, "notes_tall_1a_2026.csv"))
+  cutoff_raw <- bind_rows(
+      mutate(read_cutoff(latest), provisional = FALSE),
+      mutate(cutoff_2026,         provisional = TRUE)
+    ) |>
     mutate(nota_adj = pmax(nota, CUTOFF_FLOOR))
 
   notes <- cutoff_raw |>
@@ -133,6 +138,7 @@ build_all <- function(data_dir = find_data_dir()) {
       q75                = quantile(nota_adj, 0.75),
       n_infrademandats   = sum(nota <= CUTOFF_FLOOR + 1e-6),
       pct_infrademandats = 100 * n_infrademandats / n,
+      provisional        = all(provisional),
       .groups = "drop"
     )
 
@@ -144,6 +150,7 @@ build_all <- function(data_dir = find_data_dir()) {
                 n_estudis = n(),
                 n_sobre = sum(nota_adj >= t),
                 pct = 100 * n_sobre / n_estudis,
+                provisional = all(provisional),
                 .groups = "drop")
   }) |>
     arrange(llindar, year)

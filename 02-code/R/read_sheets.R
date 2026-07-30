@@ -127,6 +127,21 @@ read_pau <- function(path) {
     arrange(year)
 }
 
+# notes_tall_1a_2026.csv -> notes de tall de 2026 (1a assignació), extretes del
+# PDF de l'OAU amb 02-code/extract_notes_tall_pdf.py. La pestanya 5.3 històrica
+# també són notes de 1a assignació (comprovat: el 2025 hi casa a la mil·lèsima),
+# així que aquest punt amplia la sèrie sobre la mateixa base.
+read_cutoff_2026 <- function(path) {
+  raw <- utils::read.csv(path, stringsAsFactors = FALSE, fileEncoding = "UTF-8")
+  tibble(
+    codi  = as.character(raw$codi),
+    tipus = NA_character_,
+    year  = 2026L,
+    nota  = as.numeric(raw$nota)
+  ) |>
+    filter(!is.na(nota))
+}
+
 # 5.3 -> notes de tall per estudi i any (sèrie 2016-2025 dins del fitxer recent).
 # Buits = estudi no ofert -> NA (exclosos). Retorna format llarg.
 read_cutoff <- function(path) {

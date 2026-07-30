@@ -62,6 +62,21 @@ test_that("notes de tall: mediana i estudis infrademandats", {
   expect_equal(get_val(s$notes, 2025, "n_infrademandats"), 138)
 })
 
+test_that("notes de tall 2026: punt provisional de la 1a assignació (PDF)", {
+  # 2016-2025 fermes (5.3) + 2026 provisional (notes_tall_1a_2026.csv)
+  expect_setequal(s$notes$year, 2016:2026)
+  expect_setequal(s$notes$year[s$notes$provisional], 2026)
+  expect_false(any(s$notes$provisional[s$notes$year <= 2025]))
+  # xifres àncora del 2026, comprovades contra el dossier (147 al terra, mediana ~8,16)
+  expect_equal(get_val(s$notes, 2026, "n"), 558)
+  expect_equal(get_val(s$notes, 2026, "n_infrademandats"), 147)
+  expect_equal(get_val(s$notes, 2026, "mediana"), 8.16, tolerance = 1e-3)
+  # el 2026 s'ha refredat respecte al 2025: mediana més baixa, més infrademanda
+  expect_lt(get_val(s$notes, 2026, "mediana"), get_val(s$notes, 2025, "mediana"))
+  expect_gt(get_val(s$notes, 2026, "n_infrademandats"),
+            get_val(s$notes, 2025, "n_infrademandats"))
+})
+
 test_that("pressió: la ràtio sol·licitants/plaça puja de 2020 a 2025", {
   r20 <- get_val(s$pressio, 2020, "ratio")
   r25 <- get_val(s$pressio, 2025, "ratio")
